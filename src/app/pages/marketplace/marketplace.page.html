@@ -1,0 +1,275 @@
+<ion-content [fullscreen]="true" class="marketplace-content app-background-premium">
+  <!-- Partículas flotantes -->
+  <div class="particles-premium"></div>
+
+  <!-- Header -->
+  <div class="header-section glass-premium premium-float">
+    <div class="title-section">
+      <ion-icon name="storefront-outline" class="title-icon"></ion-icon>
+      <h1>🐎 Marketplace</h1>
+      <p>Compra y vende caballos de calidad</p>
+    </div>
+  </div>
+
+  <!-- Filtros avanzados -->
+  <div class="filtros-section">
+    <ion-card class="filtros-card">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="filter" color="secondary"></ion-icon>
+          Filtros Avanzados
+          <ion-button fill="clear" size="small" slot="end">
+            <ion-icon name="options"></ion-icon>
+          </ion-button>
+        </ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div class="filtros-grid">
+          <!-- Búsqueda general -->
+          <ion-item class="busqueda-item">
+            <ion-icon name="search" slot="start"></ion-icon>
+            <ion-input
+              [(ngModel)]="filtros.busqueda"
+              (ionInput)="onFiltrosChange()"
+              placeholder="Buscar caballos..."
+              clearInput="true">
+            </ion-input>
+          </ion-item>
+
+          <!-- Rango de precios -->
+          <ion-item>
+            <ion-label>Precio mínimo</ion-label>
+            <ion-input
+              type="number"
+              [(ngModel)]="filtros.precioMin"
+              (ionInput)="onFiltrosChange()"
+              placeholder="0">
+            </ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>Precio máximo</ion-label>
+            <ion-input
+              type="number"
+              [(ngModel)]="filtros.precioMax"
+              (ionInput)="onFiltrosChange()"
+              placeholder="Sin límite">
+            </ion-input>
+          </ion-item>
+
+          <!-- Rango de edad -->
+          <ion-item>
+            <ion-label>Edad mínima</ion-label>
+            <ion-input
+              type="number"
+              [(ngModel)]="filtros.edadMin"
+              (ionInput)="onFiltrosChange()"
+              placeholder="0">
+            </ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>Edad máxima</ion-label>
+            <ion-input
+              type="number"
+              [(ngModel)]="filtros.edadMax"
+              (ionInput)="onFiltrosChange()"
+              placeholder="Sin límite">
+            </ion-input>
+          </ion-item>
+
+          <!-- Sexo y Raza -->
+          <ion-item>
+            <ion-label>Sexo</ion-label>
+            <ion-select [(ngModel)]="filtros.sexo" (ionChange)="onFiltrosChange()">
+              <ion-select-option *ngFor="let sexo of sexos" [value]="sexo.value">
+                {{ sexo.label }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>Raza</ion-label>
+            <ion-select [(ngModel)]="filtros.raza" (ionChange)="onFiltrosChange()">
+              <ion-select-option *ngFor="let raza of razas" [value]="raza.value">
+                {{ raza.label }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <!-- Criadero -->
+          <ion-item>
+            <ion-label>Criadero</ion-label>
+            <ion-input
+              [(ngModel)]="filtros.criadero"
+              (ionInput)="onFiltrosChange()"
+              placeholder="Nombre del criadero">
+            </ion-input>
+          </ion-item>
+
+          <!-- Opciones adicionales -->
+          <ion-item>
+            <ion-label>Negociable</ion-label>
+            <ion-select [(ngModel)]="filtros.negociable" (ionChange)="onFiltrosChange()">
+              <ion-select-option [value]="null">Todos</ion-select-option>
+              <ion-select-option [value]="true">Solo negociables</ion-select-option>
+              <ion-select-option [value]="false">Precio fijo</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <!-- Botones -->
+          <div class="filtros-actions">
+            <ion-button fill="outline" (click)="limpiarFiltros()">
+              <ion-icon name="refresh" slot="start"></ion-icon>
+              Limpiar
+            </ion-button>
+
+            <ion-button fill="solid" (click)="onFiltrosChange()">
+              <ion-icon name="search" slot="start"></ion-icon>
+              Buscar
+            </ion-button>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Ordenamiento y estadísticas -->
+  <div class="ordenamiento-section">
+    <div class="ordenamiento-content">
+      <div class="resultados-info">
+        <h3>{{ caballosFiltrados.length }} caballos encontrados</h3>
+      </div>
+
+      <div class="ordenamiento-controls">
+        <ion-item>
+          <ion-label>Ordenar por</ion-label>
+          <ion-select (ionChange)="ordenarPor($event.detail.value)">
+            <ion-select-option value="reciente">Más recientes</ion-select-option>
+            <ion-select-option value="precio_asc">Precio: menor a mayor</ion-select-option>
+            <ion-select-option value="precio_desc">Precio: mayor a menor</ion-select-option>
+            <ion-select-option value="edad_asc">Edad: menor a mayor</ion-select-option>
+            <ion-select-option value="edad_desc">Edad: mayor a menor</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-container" *ngIf="loading">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Buscando caballos...</p>
+  </div>
+
+  <!-- Sin resultados -->
+  <div class="empty-state" *ngIf="!loading && caballosFiltrados.length === 0">
+    <ion-icon name="horse" size="large" color="medium"></ion-icon>
+    <h3>No se encontraron caballos</h3>
+    <p>Intenta cambiar los filtros de búsqueda</p>
+    <ion-button fill="outline" (click)="limpiarFiltros()">
+      <ion-icon name="refresh" slot="start"></ion-icon>
+      Limpiar Filtros
+    </ion-button>
+  </div>
+
+  <!-- Grid de caballos -->
+  <div class="caballos-grid" *ngIf="!loading && caballosFiltrados.length > 0">
+    <ion-card
+      class="caballo-card hover-lift premium-glow"
+      *ngFor="let caballo of caballosFiltrados"
+      (click)="verCaballo(caballo)">
+
+      <!-- Imagen principal -->
+      <div class="caballo-imagen">
+        <img [src]="caballo.imagenes[0] || '/assets/images/caballo-default.jpg'" [alt]="caballo.nombre">
+
+        <!-- Badges -->
+        <div class="caballo-badges">
+          <div class="destacado-badge" *ngIf="caballo.destacado">
+            <ion-icon name="star"></ion-icon>
+            Destacado
+          </div>
+          <div class="negociable-badge" *ngIf="caballo.negociable">
+            <ion-icon name="swap-horizontal"></ion-icon>
+            Negociable
+          </div>
+        </div>
+
+        <!-- Overlay con precio -->
+        <div class="precio-overlay">
+          <span class="precio-principal">{{ formatearPrecio(caballo.precio) }}</span>
+        </div>
+      </div>
+
+      <ion-card-content class="caballo-content">
+        <!-- Información básica -->
+        <div class="caballo-header">
+          <h3 class="caballo-nombre">{{ caballo.nombre }}</h3>
+          <p class="caballo-criadero">{{ caballo.criaderoNombre }}</p>
+        </div>
+
+        <!-- Características -->
+        <div class="caballo-caracteristicas">
+          <div class="caracteristica-item">
+            <ion-icon name="calendar" color="primary"></ion-icon>
+            <span>{{ getEdadTexto(caballo.edad) }}</span>
+          </div>
+
+          <div class="caracteristica-item">
+            <ion-icon name="male-female" color="secondary"></ion-icon>
+            <span>{{ caballo.sexo === 'macho' ? 'Macho' : 'Hembra' }}</span>
+          </div>
+
+          <div class="caracteristica-item">
+            <ion-icon name="ribbon" color="tertiary"></ion-icon>
+            <span>{{ getRazaDisplay(caballo.raza) }}</span>
+          </div>
+        </div>
+
+        <!-- Descripción -->
+        <p class="caballo-descripcion">{{ caballo.descripcion | slice:0:100 }}...</p>
+
+        <!-- Ubicación -->
+        <div class="caballo-ubicacion">
+          <ion-icon name="location" color="medium"></ion-icon>
+          <span>{{ caballo.ubicacion }}</span>
+        </div>
+
+        <!-- Acciones -->
+        <div class="caballo-actions">
+          <ion-button
+            fill="outline"
+            size="small"
+            (click)="contactarVendedor(caballo); $event.stopPropagation()">
+            <ion-icon name="chatbubble" slot="start"></ion-icon>
+            Contactar
+          </ion-button>
+
+          <ion-button
+            fill="solid"
+            size="small"
+            (click)="verCaballo(caballo); $event.stopPropagation()">
+            <ion-icon name="eye" slot="start"></ion-icon>
+            Ver Detalles
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer-section">
+    <div class="footer-content">
+      <p class="footer-text">
+        <ion-icon name="shield-checkmark-outline"></ion-icon>
+        Marketplace seguro con verificación de vendedores
+      </p>
+      <p class="footer-info">
+        <ion-icon name="information-circle-outline"></ion-icon>
+        Todos los caballos pasan por rigurosos controles veterinarios
+      </p>
+    </div>
+  </div>
+</ion-content>

@@ -1,0 +1,192 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Gestión de Criaderos</ion-title>
+    <ion-buttons slot="end" *ngIf="canEdit">
+      <ion-button (click)="toggleForm()">
+        <ion-icon name="add"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Filtros avanzados -->
+  <app-advanced-filters
+    [config]="filtrosConfig"
+    [values]="filtrosValues"
+    [isExpanded]="filtrosExpanded"
+    (valuesChange)="onFiltrosChange($event)"
+    (toggle)="onFiltrosToggle($event)"
+    (clear)="onFiltrosClear()"
+    (apply)="onFiltrosApply($event)">
+  </app-advanced-filters>
+
+  <!-- Estadísticas -->
+  <ion-card class="stats-card" *ngIf="criaderosFiltrados.length > 0">
+    <ion-card-content>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <ion-icon name="business" color="primary"></ion-icon>
+          <div>
+            <h3>{{ criaderosFiltrados.length }}</h3>
+            <p>Criaderos {{ filtrosValues['activo'] !== undefined ? (filtrosValues['activo'] ? 'activos' : 'inactivos') : 'totales' }}</p>
+          </div>
+        </div>
+        <div class="stat-item">
+          <ion-icon name="people" color="secondary"></ion-icon>
+          <div>
+            <h3>{{ getTotalCapacidad() }}</h3>
+            <p>Capacidad total</p>
+          </div>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Lista de criaderos -->
+  <ion-list>
+    <ion-item *ngFor="let criadero of criaderosFiltrados" lines="full" (click)="seleccionarCriadero(criadero)">
+      <ion-label>
+        <h2>{{ criadero.nombre }}</h2>
+        <p *ngIf="criadero.descripcion">{{ criadero.descripcion }}</p>
+        <p *ngIf="criadero.direccion">📍 {{ criadero.direccion }}</p>
+        <p *ngIf="criadero.telefono">📞 {{ criadero.telefono }}</p>
+        <p *ngIf="criadero.email">✉️ {{ criadero.email }}</p>
+        <p>Capacidad máxima: {{ criadero.capacidadMaxima || 0 }} caballos</p>
+        <p>Estado: <span [class]="criadero.activo ? 'text-success' : 'text-danger'">
+          {{ criadero.activo ? 'Activo' : 'Inactivo' }}
+        </span></p>
+      </ion-label>
+      <ion-button slot="end" fill="clear" color="secondary" *ngIf="canEdit" (click)="editarCriadero(criadero); $event.stopPropagation()">
+        <ion-icon name="create"></ion-icon>
+      </ion-button>
+      <ion-button slot="end" fill="clear" color="danger" *ngIf="canEdit" (click)="eliminarCriadero(criadero.id); $event.stopPropagation()">
+        <ion-icon name="trash"></ion-icon>
+      </ion-button>
+      <ion-button slot="end" fill="clear" color="primary" (click)="seleccionarCriadero(criadero); $event.stopPropagation()">
+        <ion-icon name="checkmark-circle"></ion-icon>
+      </ion-button>
+    </ion-item>
+  </ion-list>
+
+  <!-- Formulario para agregar/editar criadero -->
+  <ion-card *ngIf="showForm && canEdit">
+    <ion-card-header>
+      <ion-card-title>{{ nuevoCriadero.id ? 'Editar' : 'Agregar' }} Criadero</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <form (ngSubmit)="agregarCriadero()">
+        <ion-item>
+          <ion-input
+            label="Nombre"
+            [(ngModel)]="nuevoCriadero.nombre"
+            name="nombre"
+            required
+            placeholder="Nombre del criadero">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-textarea
+            label="Descripción"
+            [(ngModel)]="nuevoCriadero.descripcion"
+            name="descripcion"
+            placeholder="Descripción del criadero"
+            rows="2">
+          </ion-textarea>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Dirección"
+            [(ngModel)]="nuevoCriadero.direccion"
+            name="direccion"
+            placeholder="Dirección completa">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Teléfono"
+            [(ngModel)]="nuevoCriadero.telefono"
+            name="telefono"
+            placeholder="Número de teléfono">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Email"
+            [(ngModel)]="nuevoCriadero.email"
+            name="email"
+            type="email"
+            placeholder="correo@ejemplo.com">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Capacidad máxima"
+            type="number"
+            [(ngModel)]="nuevoCriadero.capacidadMaxima"
+            name="capacidadMaxima"
+            placeholder="0">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-toggle
+            [(ngModel)]="nuevoCriadero.activo"
+            name="activo">
+            Criadero activo
+          </ion-toggle>
+        </ion-item>
+
+        <div class="ion-padding">
+          <ion-button
+            type="submit"
+            expand="full"
+            [disabled]="!nuevoCriadero.nombre">
+            <ion-icon *ngIf="false" name="refresh" slot="start"></ion-icon>
+            {{ nuevoCriadero.id ? 'Actualizar' : 'Crear' }} Criadero
+          </ion-button>
+          <ion-button
+            fill="clear"
+            expand="full"
+            color="medium"
+            (click)="toggleForm()">
+            Cancelar
+          </ion-button>
+        </div>
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Mensaje cuando no hay criaderos -->
+  <ion-card *ngIf="criaderos.length === 0">
+    <ion-card-content class="ion-text-center">
+      <ion-icon name="business-outline" size="large" color="medium"></ion-icon>
+      <h3>No hay criaderos</h3>
+      <p *ngIf="canEdit">Registra tu primer criadero para comenzar</p>
+      <p *ngIf="!canEdit">No tienes permisos para gestionar criaderos</p>
+      <ion-button *ngIf="canEdit" (click)="toggleForm()">
+        <ion-icon name="add" slot="start"></ion-icon>
+        Agregar Criadero
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Información para usuarios no admin -->
+  <ion-card *ngIf="!canEdit && criaderos.length > 0">
+    <ion-card-content>
+      <ion-text color="primary">
+        <p><strong>💡 Instrucciones:</strong></p>
+        <p>Toca en cualquier criadero para seleccionarlo como tu criadero activo.</p>
+        <p>Esto te permitirá gestionar los caballos y operaciones de ese criadero.</p>
+      </ion-text>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

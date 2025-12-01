@@ -1,0 +1,92 @@
+.rider-card {
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+
+  ion-card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1rem;
+
+    .header-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+
+      .rider-name {
+        color: white;
+        font-weight: 600;
+        font-size: 1.2rem;
+        margin: 0;
+      }
+
+      ion-badge {
+        font-weight: 600;
+        padding: 0.35rem 0.75rem;
+      }
+    }
+
+    .rider-specialty {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 0.95rem;
+      margin: 0;
+    }
+  }
+
+  ion-card-content {
+    padding: 1rem;
+
+    .rider-info {
+      margin-bottom: 1rem;
+
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f0f0f0;
+
+        &:last-of-type {
+          border-bottom: none;
+        }
+
+        .label {
+          font-weight: 600;
+          color: #666;
+          font-size: 0.9rem;
+        }
+
+        .value {
+          color: #333;
+          font-size: 0.95rem;
+        }
+
+        &.contact-row {
+          gap: 0.5rem;
+
+          .contact-icon {
+            color: #667eea;
+            font-size: 1.1rem;
+          }
+
+          .contact-value {
+            color: #667eea;
+            font-weight: 500;
+          }
+        }
+      }
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: space-between;
+
+      ion-button {
+        flex: 1;
+      }
+    }
+  }
+}

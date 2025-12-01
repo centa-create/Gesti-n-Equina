@@ -1,0 +1,64 @@
+<ion-content class="login-background">
+  <div class="login-container">
+    <div class="logo-section">
+      <div class="horse-icon">🐎</div>
+      <h1 class="app-title">Gestión Equina</h1>
+      <p class="app-subtitle">Sistema de gestión para criaderos equinos</p>
+    </div>
+
+    <ion-card class="login-card">
+      <ion-card-header>
+        <ion-card-title class="login-title">Iniciar Sesión</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <form (ngSubmit)="onLogin()">
+          <ion-item class="login-item">
+            <ion-label position="floating" color="primary">Email</ion-label>
+            <ion-input
+              type="email"
+              [(ngModel)]="email"
+              name="email"
+              required
+              clearInput="true">
+            </ion-input>
+          </ion-item>
+
+          <ion-item class="login-item">
+            <ion-label position="floating" color="primary">Contraseña</ion-label>
+            <ion-input
+              type="password"
+              [(ngModel)]="password"
+              name="password"
+              required
+              clearInput="true">
+            </ion-input>
+          </ion-item>
+
+          <ion-button
+            expand="block"
+            type="submit"
+            class="login-button"
+            [disabled]="!email || !password">
+            <ion-icon name="log-in" slot="start"></ion-icon>
+            Entrar
+          </ion-button>
+        </form>
+
+        <ion-button
+          expand="block"
+          fill="outline"
+          color="primary"
+          routerLink="/registro"
+          class="register-button">
+          <ion-icon name="person-add" slot="start"></ion-icon>
+          Crear Cuenta
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="footer-text">
+      <p>© 2025 Gestión Equina - Todos los derechos reservados</p>
+    </div>
+  </div>
+</ion-content>

@@ -1,0 +1,69 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Captura de Fotos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="camera-container">
+    <!-- Mensaje de error -->
+    <div *ngIf="errorMessage" class="error-banner">
+      <p>{{ errorMessage }}</p>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="action-buttons">
+      <ion-button 
+        expand="full" 
+        color="danger"
+        (click)="takePhoto()"
+        [disabled]="isLoading">
+        <ion-icon slot="start" [icon]="cameraOutline"></ion-icon>
+        Tomar Foto con Cámara
+        <ion-spinner *ngIf="isLoading" slot="end" name="crescent"></ion-spinner>
+      </ion-button>
+
+      <ion-button 
+        expand="full" 
+        color="secondary"
+        (click)="pickFromGallery()"
+        [disabled]="isLoading">
+        <ion-icon slot="start" [icon]="imagesOutline"></ion-icon>
+        Seleccionar de Galería
+      </ion-button>
+    </div>
+
+    <!-- Galería de fotos capturadas -->
+    <div class="gallery-section">
+      <h2>Fotos Capturadas ({{ capturedPhotos.length }})</h2>
+
+      <ion-card *ngIf="capturedPhotos.length === 0" class="empty-state">
+        <ion-card-content class="ion-text-center">
+          <p>No hay fotos capturadas aún.</p>
+          <p class="hint">Captura tu primera foto usando los botones arriba.</p>
+        </ion-card-content>
+      </ion-card>
+
+      <div class="photos-grid">
+        <div *ngFor="let photo of capturedPhotos; let i = index" class="photo-item">
+          <img [src]="photo.webPath" alt="Foto capturada {{ i + 1 }}" class="photo-thumbnail">
+          <button 
+            class="delete-btn"
+            (click)="removePhoto(i)"
+            title="Eliminar foto">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <ion-button 
+        *ngIf="capturedPhotos.length > 0"
+        expand="full" 
+        fill="outline"
+        color="danger"
+        (click)="clearAllPhotos()">
+        Limpiar Todo
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

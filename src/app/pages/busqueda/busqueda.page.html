@@ -1,0 +1,148 @@
+<ion-content class="busqueda-content app-background-premium">
+  <!-- Partículas flotantes -->
+  <div class="particles-premium"></div>
+
+  <!-- Header -->
+  <div class="busqueda-header glass-premium premium-float">
+    <div class="header-content">
+      <ion-icon name="search-circle" class="header-icon text-premium-gradient"></ion-icon>
+      <div class="header-text">
+        <h1 class="text-premium-gradient">Búsqueda Global</h1>
+        <p>Encuentra información en todos los módulos del sistema</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Componente de búsqueda y filtros -->
+  <app-search-filter
+    [config]="searchConfig"
+    [initialFilters]="currentFilters"
+    (filtersChanged)="onFiltersChanged($event)"
+    (searchTriggered)="onSearchTriggered($event)">
+  </app-search-filter>
+
+  <!-- Estadísticas de búsqueda -->
+  <div class="search-stats" *ngIf="hasSearched">
+    <ion-card class="stats-card depth-premium-2 premium-glow">
+      <ion-card-content class="stats-content">
+        <div class="stats-header">
+          <ion-icon name="bar-chart" color="primary"></ion-icon>
+          <h3>Resultados de Búsqueda</h3>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-number text-premium-gradient">{{ searchStats.totalResults }}</div>
+            <div class="stat-label">Total</div>
+          </div>
+
+          <div class="stat-item" *ngIf="searchStats.produccion > 0">
+            <div class="stat-number" style="color: var(--ion-color-success);">{{ searchStats.produccion }}</div>
+            <div class="stat-label">Producción</div>
+          </div>
+
+          <div class="stat-item" *ngIf="searchStats.caballos > 0">
+            <div class="stat-number" style="color: var(--ion-color-tertiary);">{{ searchStats.caballos }}</div>
+            <div class="stat-label">Caballos</div>
+          </div>
+
+          <div class="stat-item" *ngIf="searchStats.clientes > 0">
+            <div class="stat-number" style="color: var(--ion-color-secondary);">{{ searchStats.clientes }}</div>
+            <div class="stat-label">Clientes</div>
+          </div>
+
+          <div class="stat-item" *ngIf="searchStats.servicios > 0">
+            <div class="stat-number" style="color: var(--ion-color-danger);">{{ searchStats.servicios }}</div>
+            <div class="stat-label">Servicios</div>
+          </div>
+
+          <div class="stat-item" *ngIf="searchStats.finanzas > 0">
+            <div class="stat-number" style="color: var(--ion-color-warning);">{{ searchStats.finanzas }}</div>
+            <div class="stat-label">Finanzas</div>
+          </div>
+
+          <div class="stat-item" *ngIf="searchStats.eventos > 0">
+            <div class="stat-number" style="color: var(--ion-color-primary);">{{ searchStats.eventos }}</div>
+            <div class="stat-label">Eventos</div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Resultados de búsqueda -->
+  <div class="search-results" *ngIf="hasSearched">
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading-container">
+      <div class="loading-spinner">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p>Buscando...</p>
+      </div>
+    </div>
+
+    <!-- No results -->
+    <div *ngIf="!isLoading && searchResults.length === 0" class="no-results">
+      <ion-card class="no-results-card depth-premium-2">
+        <ion-card-content class="no-results-content">
+          <ion-icon name="search" class="no-results-icon"></ion-icon>
+          <h3>No se encontraron resultados</h3>
+          <p *ngIf="!currentFilters.searchText">No hay datos en el sistema. Agrega caballos, clientes o servicios primero.</p>
+          <p *ngIf="currentFilters.searchText">Intenta con otros términos de búsqueda o ajusta los filtros</p>
+          <p class="search-debug" *ngIf="currentFilters.searchText">
+            Buscando: "{{ currentFilters.searchText }}" en {{ currentFilters.category === 'todos' ? 'todos los módulos' : (currentFilters.category || 'todos los módulos') }}
+          </p>
+          <p class="search-debug">
+            Revisa la consola del navegador (F12) para ver los logs de búsqueda
+          </p>
+          <ion-button fill="outline" (click)="performSearch()">
+            <ion-icon name="refresh" slot="start"></ion-icon>
+            Nueva Búsqueda
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Results list -->
+    <div *ngIf="!isLoading && searchResults.length > 0" class="results-list">
+      <ion-card class="results-card depth-premium-2" *ngFor="let result of searchResults; trackBy: trackByResult">
+        <ion-card-content class="result-item hover-lift magnetic-premium" (click)="navigateToResult(result)">
+          <div class="result-header">
+            <div class="result-icon">
+              <ion-icon [name]="getResultIcon(result)" [color]="getResultColor(result)"></ion-icon>
+            </div>
+            <div class="result-info">
+              <h4 class="result-title">{{ result.title }}</h4>
+              <p class="result-subtitle">{{ result.subtitle }}</p>
+            </div>
+            <ion-icon name="chevron-forward" class="result-arrow"></ion-icon>
+          </div>
+
+          <div class="result-details">
+            <p class="result-description">{{ result.description }}</p>
+            <div class="result-meta">
+              <span class="result-type" [style.color]="'var(--ion-color-' + getResultColor(result) + ')'">
+                {{ result.type | titlecase }}
+              </span>
+              <span class="result-date" *ngIf="result.date">
+                {{ result.date | date:'dd/MM/yyyy' }}
+              </span>
+              <span class="result-category" *ngIf="result.category">
+                {{ result.category }}
+              </span>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="busqueda-footer">
+    <div class="footer-content">
+      <p class="footer-text">
+        <ion-icon name="search" color="primary"></ion-icon>
+        Búsqueda inteligente en todos los módulos
+      </p>
+    </div>
+  </div>
+</ion-content>

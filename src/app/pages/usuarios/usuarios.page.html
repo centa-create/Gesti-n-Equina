@@ -1,0 +1,32 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Gestión de Usuarios</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <h2>Usuarios del Sistema</h2>
+
+  <ion-list *ngIf="!loading">
+    <ion-item *ngFor="let usuario of usuarios">
+      <ion-label>
+        <h3>{{ usuario.nombre }} {{ usuario.apellido }}</h3>
+        <p>Rol actual: {{ usuario.rol }}</p>
+      </ion-label>
+      <ion-select
+        *ngIf="canEdit"
+        slot="end"
+        [value]="usuario.rol"
+        (ionChange)="cambiarRol(usuario, $event.detail.value)">
+        <ion-select-option value="admin">Admin</ion-select-option>
+        <ion-select-option value="empleado">Empleado</ion-select-option>
+        <ion-select-option value="visitante">Visitante</ion-select-option>
+      </ion-select>
+    </ion-item>
+  </ion-list>
+
+  <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
+</ion-content>

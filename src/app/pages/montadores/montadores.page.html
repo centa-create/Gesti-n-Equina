@@ -1,0 +1,56 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Montadores</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Montadores</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-list>
+    <ion-item *ngFor="let montador of montadores">
+      <ion-label>
+        <h2>{{ montador.nombre }} {{ montador.apellido }}</h2>
+        <p>Especialidad: {{ montador.especialidad }} | Experiencia: {{ montador.experienciaAnios }} años</p>
+        <p>Disponibilidad: {{ montador.disponibilidad }}</p>
+      </ion-label>
+      <ion-button fill="clear" slot="end" color="primary" *ngIf="canEdit" (click)="editarMontador(montador)">
+        <ion-icon name="create"></ion-icon>
+      </ion-button>
+      <ion-button fill="clear" slot="end" color="danger" *ngIf="canEdit" (click)="eliminarMontador(montador.id)">
+        <ion-icon name="trash"></ion-icon>
+      </ion-button>
+    </ion-item>
+  </ion-list>
+
+  <ion-card *ngIf="canEdit">
+    <ion-card-header>
+      <ion-card-title>{{ nuevoMontador.id ? 'Editar' : 'Agregar' }} Montador</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-input label="Nombre" [(ngModel)]="nuevoMontador.nombre" placeholder="Nombre"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input label="Apellido" [(ngModel)]="nuevoMontador.apellido" placeholder="Apellido"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-select label="Especialidad" [(ngModel)]="nuevoMontador.especialidad">
+          <ion-select-option value="jinete">Jinete</ion-select-option>
+          <ion-select-option value="entrenador">Entrenador</ion-select-option>
+          <ion-select-option value="herrador">Herrador</ion-select-option>
+          <ion-select-option value="veterinario">Veterinario</ion-select-option>
+          <ion-select-option value="otro">Otro</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-button expand="full" (click)="agregarMontador()">{{ nuevoMontador.id ? 'Actualizar' : 'Agregar' }} Montador</ion-button>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

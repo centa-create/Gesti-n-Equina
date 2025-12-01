@@ -1,0 +1,41 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      Bienvenido
+      <span *ngIf="criaderoActivo">al {{ criaderoActivo.nombre }}</span>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">Cerrar sesión</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- 🔔 Notificaciones -->
+  <ion-list *ngIf="notificaciones.length > 0">
+    <ion-item *ngFor="let n of notificaciones">
+      <ion-label>{{ n.mensaje }}</ion-label>
+      <ion-button fill="clear" color="danger" (click)="eliminarNotificacion(n.id)">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </ion-item>
+  </ion-list>
+
+  <!-- 📊 Dashboard dinámico -->
+  <ion-grid>
+    <ion-row>
+      <!-- Mostrar solo los módulos permitidos según el rol -->
+      <ion-col size="6" *ngFor="let item of visibleItems">
+        <ion-card (click)="navigate(item.path)">
+          <ion-card-header>
+            <ion-icon [name]="item.icon" size="large"></ion-icon>
+          </ion-card-header>
+          <ion-card-content>
+            {{ item.title }}
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

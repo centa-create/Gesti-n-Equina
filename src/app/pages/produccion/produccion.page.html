@@ -1,0 +1,240 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Registro de Producción</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="resetForm()" *ngIf="isEditing">
+        <ion-icon name="close" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Formulario de Registro -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="add-circle" color="primary"></ion-icon>
+        {{ isEditing ? 'Editar Producción' : 'Nueva Producción' }}
+      </ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+      <form [formGroup]="produccionForm" (ngSubmit)="onSubmit()">
+        <!-- Fecha de Producción -->
+        <ion-item>
+          <ion-label position="floating">Fecha de Producción *</ion-label>
+          <ion-datetime
+            formControlName="fechaProduccion"
+            display-format="DD/MM/YYYY"
+            picker-format="DD/MM/YYYY"
+            [max]="getCurrentDate()">
+          </ion-datetime>
+        </ion-item>
+
+        <!-- Tipo de Producto -->
+        <ion-item>
+          <ion-label position="floating">Tipo de Producto *</ion-label>
+          <ion-select formControlName="tipoProducto" placeholder="Seleccione un tipo">
+            <ion-select-option *ngFor="let tipo of tiposProducto" [value]="tipo">
+              {{ tipo }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <!-- Cantidad y Unidad -->
+        <ion-item>
+          <ion-label position="floating">Cantidad *</ion-label>
+          <ion-input
+            type="number"
+            formControlName="cantidad"
+            placeholder="0"
+            min="0"
+            step="0.01">
+          </ion-input>
+          <ion-select formControlName="unidad" slot="end" style="min-width: 100px;">
+            <ion-select-option *ngFor="let unidad of unidades" [value]="unidad">
+              {{ unidad }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <!-- Costo Operativo -->
+        <ion-item>
+          <ion-label position="floating">Costo Operativo ($)</ion-label>
+          <ion-input
+            type="number"
+            formControlName="costoOperativo"
+            placeholder="0"
+            min="0"
+            step="0.01">
+          </ion-input>
+        </ion-item>
+
+        <!-- Ingresos Generados -->
+        <ion-item>
+          <ion-label position="floating">Ingresos Generados ($)</ion-label>
+          <ion-input
+            type="number"
+            formControlName="ingresosGenerados"
+            placeholder="0"
+            min="0"
+            step="0.01">
+          </ion-input>
+        </ion-item>
+
+        <!-- Observaciones -->
+        <ion-item>
+          <ion-label position="floating">Observaciones</ion-label>
+          <ion-textarea
+            formControlName="observaciones"
+            placeholder="Observaciones adicionales..."
+            rows="3">
+          </ion-textarea>
+        </ion-item>
+
+        <!-- Botones -->
+        <ion-button
+          type="submit"
+          expand="block"
+          [disabled]="!produccionForm.valid || isLoading"
+          class="ion-margin-top">
+          <ion-icon name="save" slot="start"></ion-icon>
+          {{ isEditing ? 'Actualizar' : 'Registrar' }} Producción
+        </ion-button>
+
+        <ion-button
+          type="button"
+          expand="block"
+          fill="outline"
+          (click)="resetForm()"
+          class="ion-margin-top">
+          <ion-icon name="refresh" slot="start"></ion-icon>
+          Limpiar Formulario
+        </ion-button>
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Componente de Búsqueda y Filtros Premium -->
+  <app-search-filter
+    [config]="searchConfig"
+    (filtersChanged)="onFiltersChanged($event)"
+    (searchTriggered)="onSearchTriggered($event)">
+  </app-search-filter>
+
+  <!-- Estadísticas Rápidas -->
+  <ion-card *ngIf="getProduccionesMostradas().length > 0">
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="stats-chart" color="secondary"></ion-icon>
+        Resumen de Producción
+      </ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="4">
+            <ion-card class="stat-card">
+              <ion-card-content class="text-center">
+                <ion-icon name="trending-up" color="success" size="large"></ion-icon>
+                <h3>{{ getTotalIngresos() | currency:'COP':'symbol':'1.0-0' }}</h3>
+                <p>Ingresos Totales</p>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+
+          <ion-col size="4">
+            <ion-card class="stat-card">
+              <ion-card-content class="text-center">
+                <ion-icon name="cash" color="warning" size="large"></ion-icon>
+                <h3>{{ getTotalCostos() | currency:'COP':'symbol':'1.0-0' }}</h3>
+                <p>Costos Totales</p>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+
+          <ion-col size="4">
+            <ion-card class="stat-card">
+              <ion-card-content class="text-center">
+                <ion-icon name="wallet" [color]="getBeneficioNeto() >= 0 ? 'success' : 'danger'" size="large"></ion-icon>
+                <h3 [class]="getBeneficioNeto() >= 0 ? 'positive' : 'negative'">
+                  {{ getBeneficioNeto() | currency:'COP':'symbol':'1.0-0' }}
+                </h3>
+                <p>Beneficio Neto</p>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Lista de Producciones -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="list" color="tertiary"></ion-icon>
+        Historial de Producción
+        <ion-badge color="primary" slot="end">{{ getProduccionesMostradas().length }}</ion-badge>
+      </ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-list *ngIf="getProduccionesMostradas().length > 0; else noData">
+        <ion-item-sliding *ngFor="let produccion of getProduccionesMostradas()">
+          <ion-item>
+            <ion-avatar slot="start">
+              <ion-icon name="leaf" color="success"></ion-icon>
+            </ion-avatar>
+
+            <ion-label>
+              <h2>{{ produccion.tipoProducto }}</h2>
+              <p>{{ produccion.fechaProduccion | date:'dd/MM/yyyy' }}</p>
+              <p>
+                <strong>{{ produccion.cantidad }} {{ produccion.unidad }}</strong> |
+                Ingresos: {{ produccion.ingresosGenerados | currency:'COP':'symbol':'1.0-0' }} |
+                Costos: {{ produccion.costoOperativo | currency:'COP':'symbol':'1.0-0' }}
+              </p>
+              <p *ngIf="produccion.observaciones" class="observaciones">
+                {{ produccion.observaciones }}
+              </p>
+            </ion-label>
+
+            <ion-chip [color]="(produccion.ingresosGenerados - produccion.costoOperativo) >= 0 ? 'success' : 'danger'" slot="end">
+              <ion-icon name="trending-up"></ion-icon>
+              <ion-label>{{ (produccion.ingresosGenerados - produccion.costoOperativo) | currency:'COP':'symbol':'1.0-0' }}</ion-label>
+            </ion-chip>
+          </ion-item>
+
+          <ion-item-options side="end">
+            <ion-item-option color="primary" (click)="editProduccion(produccion)">
+              <ion-icon name="create" slot="icon-only"></ion-icon>
+            </ion-item-option>
+            <ion-item-option color="danger" (click)="deleteProduccion(produccion.id!)">
+              <ion-icon name="trash" slot="icon-only"></ion-icon>
+            </ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
+      </ion-list>
+
+      <ng-template #noData>
+        <ion-text color="medium" class="ion-text-center">
+          <p>
+            <ion-icon name="document" size="large"></ion-icon><br>
+            No hay registros de producción aún.<br>
+            Registra tu primera producción arriba.
+          </p>
+        </ion-text>
+      </ng-template>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Loading Spinner -->
+  <ion-loading
+    [isOpen]="isLoading"
+    message="Procesando..."
+    spinner="crescent">
+  </ion-loading>
+</ion-content>

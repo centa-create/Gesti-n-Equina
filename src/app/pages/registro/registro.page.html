@@ -1,0 +1,85 @@
+<ion-content class="register-background">
+  <div class="register-container">
+    <div class="logo-section">
+      <div class="horse-icon">🐎</div>
+      <h1 class="app-title">Gestión Equina</h1>
+      <p class="app-subtitle">Sistema de gestión para criaderos equinos</p>
+    </div>
+
+    <ion-card class="register-card">
+      <ion-card-header>
+        <ion-card-title class="register-title">Crear Cuenta</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <form [formGroup]="registroForm" (ngSubmit)="registrar()">
+          <ion-item class="register-item">
+            <ion-label position="floating" color="primary">Nombre</ion-label>
+            <ion-input
+              formControlName="nombre"
+              clearInput="true">
+            </ion-input>
+          </ion-item>
+
+          <ion-item class="register-item">
+            <ion-label position="floating" color="primary">Apellido</ion-label>
+            <ion-input
+              formControlName="apellido"
+              clearInput="true">
+            </ion-input>
+          </ion-item>
+
+          <ion-item class="register-item">
+            <ion-label position="floating" color="primary">Email</ion-label>
+            <ion-input
+              type="email"
+              formControlName="email"
+              clearInput="true">
+            </ion-input>
+          </ion-item>
+
+          <ion-item class="register-item">
+            <ion-label position="floating" color="primary">Contraseña</ion-label>
+            <ion-input
+              type="password"
+              formControlName="password"
+              clearInput="true">
+            </ion-input>
+          </ion-item>
+
+          <ion-item class="register-item">
+            <ion-label position="floating" color="primary">Confirmar contraseña</ion-label>
+            <ion-input
+              type="password"
+              formControlName="confirmar"
+              clearInput="true">
+            </ion-input>
+          </ion-item>
+
+          <ion-button
+            expand="block"
+            type="submit"
+            class="register-button"
+            [disabled]="registroForm.invalid">
+            <ion-icon name="person-add-outline" slot="start"></ion-icon>
+            Registrarse
+          </ion-button>
+        </form>
+
+        <ion-button
+          expand="block"
+          fill="outline"
+          color="primary"
+          routerLink="/login"
+          class="login-button">
+          <ion-icon name="log-in-outline" slot="start"></ion-icon>
+          Ya tengo cuenta
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="footer-text">
+      <p>🏇 Gestión Equina - Todos los derechos reservados</p>
+    </div>
+  </div>
+</ion-content>

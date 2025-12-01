@@ -1,0 +1,226 @@
+/* ===========================================
+   COMPONENTE DE BÚSQUEDA Y FILTROS PREMIUM
+   =========================================== */
+
+.search-filter-container {
+  margin: var(--spacing-lg) 0;
+  position: relative;
+  z-index: 10;
+
+  .search-bar {
+    display: flex;
+    gap: var(--spacing);
+    align-items: center;
+    margin-bottom: var(--spacing);
+
+    .search-input-item {
+      flex: 1;
+      --border-radius: var(--border-radius-xl);
+      --background: rgba(255, 255, 255, 0.9);
+      --border-color: rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition-normal);
+
+      &:hover {
+        --border-color: var(--primary-color);
+        box-shadow: var(--shadow-md);
+      }
+
+      .search-input {
+        --color: var(--gray-900);
+        --placeholder-color: var(--gray-500);
+        font-weight: 500;
+      }
+
+      .search-btn {
+        --color: var(--primary-color);
+        --background-hover: rgba(34, 197, 94, 0.1);
+        margin: 0;
+      }
+    }
+
+    .filter-toggle-btn {
+      --border-radius: var(--border-radius-xl);
+      --background: rgba(255, 255, 255, 0.9);
+      --color: var(--primary-color);
+      --border-color: rgba(34, 197, 94, 0.3);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-sm);
+      font-weight: 600;
+      white-space: nowrap;
+      transition: var(--transition-bounce);
+
+      &:hover {
+        --background: rgba(34, 197, 94, 0.1);
+        transform: scale(1.02);
+      }
+
+      ion-badge {
+        --background: var(--primary-color);
+        --color: white;
+        font-size: 0.7rem;
+        margin-left: var(--spacing-xs);
+      }
+    }
+  }
+
+  .advanced-filters {
+    overflow: hidden;
+    animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+    .filters-card {
+      --background: rgba(255, 255, 255, 0.95);
+      border-radius: var(--border-radius-2xl);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(25px);
+      margin: 0;
+
+      .filters-header {
+        background: var(--gradient-harvest);
+        color: white;
+        padding: var(--spacing-lg);
+        border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0;
+
+        ion-card-title {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-sm);
+          font-size: 1.1rem;
+          font-weight: 700;
+          margin: 0;
+
+          ion-icon {
+            font-size: 1.2rem;
+          }
+        }
+      }
+
+      .filters-content {
+        padding: var(--spacing-lg);
+
+        .filter-item {
+          --border-radius: var(--border-radius-lg);
+          --background: rgba(255, 255, 255, 0.8);
+          --border-color: rgba(0, 0, 0, 0.08);
+          margin-bottom: var(--spacing);
+          transition: var(--transition-normal);
+
+          &:hover {
+            --background: rgba(255, 255, 255, 0.95);
+            --border-color: rgba(34, 197, 94, 0.3);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+          }
+
+          ion-datetime {
+            --background: transparent;
+            --color: var(--gray-900);
+          }
+
+          ion-select {
+            --placeholder-color: var(--gray-500);
+          }
+        }
+
+        .filter-actions {
+          display: flex;
+          gap: var(--spacing);
+          justify-content: flex-end;
+          margin-top: var(--spacing-lg);
+          padding-top: var(--spacing-lg);
+          border-top: 1px solid rgba(0, 0, 0, 0.08);
+
+          .clear-btn {
+            --border-radius: var(--border-radius-lg);
+            --background: rgba(239, 68, 68, 0.1);
+            --color: #dc2626;
+            --border-color: rgba(239, 68, 68, 0.3);
+            font-weight: 600;
+
+            &:hover {
+              --background: rgba(239, 68, 68, 0.2);
+            }
+          }
+
+          .search-btn {
+            --border-radius: var(--border-radius-lg);
+            --background: var(--gradient-primary);
+            --color: white;
+            font-weight: 700;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition-bounce);
+
+            &:hover {
+              transform: scale(1.02);
+              box-shadow: var(--shadow-lg);
+            }
+
+            &:active {
+              transform: scale(0.98);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/* Animaciones para el componente */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    max-height: 1000px;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 576px) {
+  .search-filter-container {
+    margin: var(--spacing) 0;
+
+    .search-bar {
+      flex-direction: column;
+      gap: var(--spacing-sm);
+
+      .filter-toggle-btn {
+        width: 100%;
+        --padding-start: var(--spacing-lg);
+        --padding-end: var(--spacing-lg);
+      }
+    }
+
+    .advanced-filters .filters-content {
+      padding: var(--spacing);
+
+      .filter-actions {
+        flex-direction: column;
+
+        .clear-btn,
+        .search-btn {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .search-filter-container {
+    .advanced-filters .filters-content {
+      ion-row {
+        ion-col {
+          &:not(:last-child) {
+            margin-bottom: var(--spacing);
+          }
+        }
+      }
+    }
+  }
+}

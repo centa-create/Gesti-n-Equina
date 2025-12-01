@@ -1,0 +1,409 @@
+.marketplace-content {
+  --background: linear-gradient(135deg, #fef7ed 0%, #fed7aa 100%);
+
+  .particles-premium {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .header-section {
+    padding: 20px;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 2;
+
+    .title-section {
+      text-align: center;
+
+      .title-icon {
+        font-size: 2.5rem;
+        color: #ea580c;
+        margin-bottom: 8px;
+      }
+
+      h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0 0 5px 0;
+        background: linear-gradient(135deg, #ea580c, #c2410c);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      p {
+        color: #6b7280;
+        font-size: 1.1rem;
+        margin: 0;
+      }
+    }
+  }
+
+  .filtros-section {
+    padding: 0 20px;
+    margin-bottom: 30px;
+
+    .filtros-card {
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(20px);
+
+      ion-card-header {
+        ion-button {
+          --color: #6b7280;
+        }
+      }
+
+      .filtros-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+
+        .busqueda-item {
+          grid-column: 1 / -1;
+        }
+
+        ion-item {
+          --background: rgba(255, 255, 255, 0.8);
+          --border-radius: 15px;
+          --padding-start: 15px;
+          --padding-end: 15px;
+          --inner-padding-end: 15px;
+          border: 1px solid rgba(0, 0, 0, 0.1);
+          margin-bottom: 10px;
+
+          ion-input, ion-select {
+            --placeholder-color: #9ca3af;
+          }
+        }
+
+        .filtros-actions {
+          grid-column: 1 / -1;
+          display: flex;
+          gap: 15px;
+          justify-content: center;
+          margin-top: 10px;
+
+          ion-button {
+            min-width: 120px;
+          }
+        }
+      }
+    }
+  }
+
+  .ordenamiento-section {
+    padding: 0 20px;
+    margin-bottom: 20px;
+
+    .ordenamiento-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+
+      .resultados-info {
+        h3 {
+          margin: 0;
+          color: #374151;
+          font-size: 1.1rem;
+        }
+      }
+
+      .ordenamiento-controls {
+        ion-item {
+          --background: rgba(255, 255, 255, 0.9);
+          --border-radius: 15px;
+          --padding-start: 15px;
+          --padding-end: 15px;
+          border: 1px solid rgba(0, 0, 0, 0.1);
+          min-width: 200px;
+        }
+      }
+    }
+  }
+
+  .caballos-grid {
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+  }
+
+  .loading-container, .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    text-align: center;
+
+    ion-icon {
+      font-size: 4rem;
+      color: #d1d5db;
+      margin-bottom: 20px;
+    }
+
+    h3 {
+      color: #374151;
+      margin: 10px 0;
+    }
+
+    p {
+      color: #6b7280;
+      margin: 0 0 20px 0;
+    }
+  }
+
+  .footer-section {
+    padding: 30px 20px;
+    margin-top: 40px;
+    background: linear-gradient(135deg, #92400e, #78350f);
+    color: white;
+
+    .footer-content {
+      text-align: center;
+
+      p {
+        margin: 5px 0;
+        font-size: 0.9rem;
+        opacity: 0.9;
+
+        ion-icon {
+          margin-right: 8px;
+          color: #ea580c;
+        }
+      }
+    }
+  }
+}
+
+// Estilos para las tarjetas de caballos
+.caballo-card {
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  background: white;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.15);
+  }
+
+  .caballo-imagen {
+    position: relative;
+    height: 220px;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    &:hover img {
+      transform: scale(1.05);
+    }
+
+    .caballo-badges {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+
+    .destacado-badge, .negociable-badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+
+      ion-icon {
+        font-size: 0.9rem;
+      }
+    }
+
+    .destacado-badge {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+    }
+
+    .negociable-badge {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+    }
+
+    .precio-overlay {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 10px 15px;
+      text-align: center;
+
+      .precio-principal {
+        color: white;
+        font-size: 1.2rem;
+        font-weight: 700;
+      }
+    }
+  }
+
+  .caballo-content {
+    padding: 20px;
+
+    .caballo-header {
+      margin-bottom: 15px;
+
+      .caballo-nombre {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0 0 5px 0;
+      }
+
+      .caballo-criadero {
+        color: #6b7280;
+        font-size: 0.9rem;
+        margin: 0;
+        font-weight: 500;
+      }
+    }
+
+    .caballo-caracteristicas {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+
+      .caracteristica-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(234, 88, 12, 0.1);
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        color: #9a3412;
+
+        ion-icon {
+          font-size: 1rem;
+          color: #ea580c;
+        }
+      }
+    }
+
+    .caballo-descripcion {
+      color: #4b5563;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      margin-bottom: 15px;
+    }
+
+    .caballo-ubicacion {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #6b7280;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+
+      ion-icon {
+        color: #9ca3af;
+      }
+    }
+
+    .caballo-actions {
+      display: flex;
+      gap: 10px;
+
+      ion-button {
+        flex: 1;
+        --border-radius: 12px;
+        font-weight: 600;
+        height: 44px;
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .marketplace-content {
+    .filtros-section .filtros-grid {
+      grid-template-columns: 1fr;
+
+      .filtros-actions {
+        flex-direction: column;
+
+        ion-button {
+          width: 100%;
+        }
+      }
+    }
+
+    .ordenamiento-section .ordenamiento-content {
+      flex-direction: column;
+      text-align: center;
+
+      .ordenamiento-controls ion-item {
+        min-width: auto;
+        width: 100%;
+      }
+    }
+
+    .caballos-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .caballo-card .caballo-content .caballo-caracteristicas {
+      justify-content: center;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .marketplace-content {
+    .caballo-card .caballo-actions {
+      flex-direction: column;
+
+      ion-button {
+        margin-bottom: 8px;
+      }
+    }
+
+    .caballo-card .caballo-caracteristicas {
+      justify-content: center;
+      gap: 8px;
+
+      .caracteristica-item {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+      }
+    }
+  }
+}

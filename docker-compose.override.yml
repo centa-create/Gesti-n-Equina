@@ -1,0 +1,26 @@
+# Development overrides
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+      - "4200:4200"  # For Angular dev server
+    command: ["npm", "run", "start:full"]
+
+  db:
+    image: sqlite3:latest
+    volumes:
+      - ./data:/data
+    networks:
+      - gestion-equina-network
+    command: ["tail", "-f", "/dev/null"]  # Keep container running

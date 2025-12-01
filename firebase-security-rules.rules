@@ -1,0 +1,123 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Función auxiliar para verificar roles
+    function isAdmin() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roleId == 'admin';
+    }
+
+    function isEmpleado() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        ['admin', 'empleado'].hasAny([get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roleId]);
+    }
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function isCriaderoOwner(criaderoId) {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/criaderos/$(criaderoId)) &&
+        get(/databases/$(database)/documents/criaderos/$(criaderoId)).data.createdBy == request.auth.uid;
+    }
+
+    // Reglas para usuarios
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) || isAdmin();
+      allow create: if request.auth != null;
+    }
+
+    // Reglas para roles (solo lectura)
+    match /roles/{roleId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Solo se crean una vez
+    }
+
+    // Reglas para criaderos
+    match /criaderos/{criaderoId} {
+      allow read: if resource.data.activo == true || isAdmin() || isCriaderoOwner(criaderoId);
+      allow write: if isAdmin() || (resource == null && request.auth != null) || isCriaderoOwner(criaderoId);
+    }
+
+    // Reglas para clientes
+    match /clientes/{clienteId} {
+      allow read, write: if isAdmin() || isEmpleado();
+    }
+
+    // Reglas para caballos
+    match /caballos/{caballoId} {
+      allow read: if isAdmin() || isEmpleado() ||
+        (exists(/databases/$(database)/documents/criaderos/$(resource.data.criaderoId)) &&
+         isCriaderoOwner(resource.data.criaderoId));
+      allow write: if isAdmin() || isEmpleado() ||
+        (exists(/databases/$(database)/documents/criaderos/$(resource.data.criaderoId)) &&
+         isCriaderoOwner(resource.data.criaderoId));
+    }
+
+    // Reglas para servicios
+    match /servicios/{servicioId} {
+      allow read, write: if isAdmin() || isEmpleado() ||
+        (exists(/databases/$(database)/documents/caballos/$(resource.data.caballoId)) &&
+         exists(/databases/$(database)/documents/criaderos/$(get(/databases/$(database)/documents/caballos/$(resource.data.caballoId)).data.criaderoId)) &&
+         isCriaderoOwner(get(/databases/$(database)/documents/caballos/$(resource.data.caballoId)).data.criaderoId));
+    }
+
+    // Reglas para finanzas
+    match /finanzas/{transaccionId} {
+      allow read, write: if isAdmin() || isEmpleado();
+    }
+
+    // Reglas para inventario
+    match /inventario/{itemId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin() || isEmpleado();
+    }
+
+    // Reglas para movimientos de inventario
+    match /movimientos_inventario/{movimientoId} {
+      allow read, write: if isAdmin() || isEmpleado();
+    }
+
+    // Reglas para eventos
+    match /eventos/{eventoId} {
+      allow read: if isOwner(resource.data.usuarioId) || isAdmin() || isEmpleado();
+      allow write: if isOwner(resource.data.usuarioId) || isAdmin() || isEmpleado();
+      allow create: if request.auth != null;
+    }
+
+    // Reglas para notificaciones
+    match /notificaciones/{notificacionId} {
+      allow read: if isOwner(resource.data.usuarioId);
+      allow write: if isOwner(resource.data.usuarioId) || isAdmin();
+    }
+
+    // Reglas para proveedores
+    match /proveedores/{proveedorId} {
+      allow read: if resource.data.activo == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Reglas para montadores
+    match /montadores/{montadorId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin() || isEmpleado();
+    }
+
+    // Reglas para herrajes
+    match /herrajes/{herrajeId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin() || isEmpleado();
+    }
+
+    // Reglas para auditoría (solo lectura para admins)
+    match /auditoria/{cambioId} {
+      allow read: if isAdmin();
+      allow write: if false; // Solo funciones pueden escribir
+    }
+  }
+}

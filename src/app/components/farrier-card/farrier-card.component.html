@@ -1,0 +1,41 @@
+<ion-card class="farrier-card">
+  <img [src]="getImageUrl()" alt="{{ farrier.name }}" class="farrier-image">
+  
+  <ion-card-header>
+    <ion-card-title class="farrier-name">{{ farrier.name }}</ion-card-title>
+    <p class="farrier-type">{{ farrier.type }}</p>
+  </ion-card-header>
+
+  <ion-card-content>
+    <div class="farrier-info">
+      <p class="description">{{ farrier.description }}</p>
+
+      <div class="price-section">
+        <span class="price">{{ formattedPrice() }}</span>
+        <ion-chip [color]="getStockColor()" class="stock-chip">
+          {{ getStockStatus() }} ({{ farrier.stock }})
+        </ion-chip>
+      </div>
+
+      <div *ngIf="farrier.supplier" class="supplier-row">
+        <span class="label">Proveedor:</span>
+        <span class="value">{{ farrier.supplier }}</span>
+      </div>
+    </div>
+
+    <div *ngIf="showActions" class="actions">
+      <ion-button fill="clear" size="small" color="primary" (click)="onViewDetails()">
+        <ion-icon slot="start" [icon]="eyeOutline"></ion-icon>
+        Ver
+      </ion-button>
+      <ion-button fill="clear" size="small" color="warning" (click)="onEdit()">
+        <ion-icon slot="start" [icon]="createOutline"></ion-icon>
+        Editar
+      </ion-button>
+      <ion-button fill="clear" size="small" color="danger" (click)="onDelete()">
+        <ion-icon slot="start" [icon]="trashOutline"></ion-icon>
+        Eliminar
+      </ion-button>
+    </div>
+  </ion-card-content>
+</ion-card>

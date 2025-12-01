@@ -1,0 +1,211 @@
+<ion-content [fullscreen]="true" class="tienda-content app-background-premium">
+  <!-- Partículas flotantes -->
+  <div class="particles-premium"></div>
+
+  <!-- Header con carrito -->
+  <div class="header-section glass-premium premium-float">
+    <div class="header-content">
+      <div class="title-section">
+        <ion-icon name="storefront-outline" class="title-icon"></ion-icon>
+        <h1>🏪 Tienda Online</h1>
+        <p>Productos para el cuidado de tus caballos</p>
+      </div>
+
+      <!-- Carrito flotante -->
+      <div class="carrito-flotante" *ngIf="getCantidadEnCarrito() > 0" (click)="verCarrito()">
+        <ion-icon name="bag-handle-outline"></ion-icon>
+        <span class="carrito-cantidad">{{ getCantidadEnCarrito() }}</span>
+        <span class="carrito-total">{{ formatearPrecio(getTotalCarrito()) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra de búsqueda y filtros -->
+  <div class="filtros-section">
+    <ion-card class="filtros-card">
+      <ion-card-content>
+        <div class="filtros-grid">
+          <!-- Búsqueda -->
+          <ion-item class="busqueda-item">
+            <ion-icon name="search" slot="start"></ion-icon>
+            <ion-input
+              [(ngModel)]="filtros.busqueda"
+              (ionInput)="onFiltrosChange()"
+              placeholder="Buscar productos..."
+              clearInput="true">
+            </ion-input>
+          </ion-item>
+
+          <!-- Categoría -->
+          <ion-item>
+            <ion-label>Categoría</ion-label>
+            <ion-select [(ngModel)]="filtros.categoria" (ionChange)="onFiltrosChange()">
+              <ion-select-option *ngFor="let cat of categorias" [value]="cat.value">
+                {{ cat.label }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <!-- Rango de precios -->
+          <ion-item>
+            <ion-label>Precio mínimo</ion-label>
+            <ion-input
+              type="number"
+              [(ngModel)]="filtros.precioMin"
+              (ionInput)="onFiltrosChange()"
+              placeholder="0">
+            </ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>Precio máximo</ion-label>
+            <ion-input
+              type="number"
+              [(ngModel)]="filtros.precioMax"
+              (ionInput)="onFiltrosChange()"
+              placeholder="Sin límite">
+            </ion-input>
+          </ion-item>
+
+          <!-- Botón limpiar -->
+          <ion-button
+            fill="outline"
+            (click)="limpiarFiltros()"
+            class="limpiar-btn">
+            <ion-icon name="refresh" slot="start"></ion-icon>
+            Limpiar
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Productos destacados -->
+  <div class="destacados-section" *ngIf="productosDestacados.length > 0">
+    <h2 class="section-title">⭐ Productos Destacados</h2>
+    <div class="productos-grid">
+      <ion-card
+        class="producto-card destacado hover-lift premium-glow"
+        *ngFor="let producto of productosDestacados"
+        (click)="verProducto(producto)">
+        <div class="producto-imagen">
+          <img [src]="producto.imagenes[0] || '/assets/images/producto-default.jpg'" [alt]="producto.nombre">
+          <div class="destacado-badge" *ngIf="producto.destacado">
+            <ion-icon name="star"></ion-icon>
+            Destacado
+          </div>
+          <div class="oferta-badge" *ngIf="tieneOferta(producto)">
+            -{{ getDescuento(producto) }}%
+          </div>
+        </div>
+
+        <ion-card-content class="producto-content">
+          <div class="producto-info">
+            <h3 class="producto-nombre">{{ producto.nombre }}</h3>
+            <p class="producto-criadero">{{ producto.criaderoNombre }}</p>
+            <p class="producto-descripcion">{{ producto.descripcion | slice:0:80 }}...</p>
+          </div>
+
+          <div class="producto-precio">
+            <span class="precio-actual">{{ formatearPrecio(getPrecioFinal(producto)) }}</span>
+            <span class="precio-anterior" *ngIf="tieneOferta(producto)">
+              {{ formatearPrecio(producto.precio) }}
+            </span>
+          </div>
+
+          <div class="producto-stock">
+            <span [class]="producto.stock > 0 ? 'stock-disponible' : 'stock-agotado'">
+              {{ producto.stock > 0 ? 'Disponible' : 'Agotado' }}
+            </span>
+            <small>{{ producto.stock }} unidades</small>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+
+  <!-- Todos los productos -->
+  <div class="productos-section">
+    <div class="productos-header">
+      <h2 class="section-title">🛍️ Todos los Productos</h2>
+      <p class="productos-count">{{ productosFiltrados.length }} productos encontrados</p>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-container" *ngIf="loading">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Cargando productos...</p>
+    </div>
+
+    <!-- Sin productos -->
+    <div class="empty-state" *ngIf="!loading && productosFiltrados.length === 0">
+      <ion-icon name="storefront-outline" size="large" color="medium"></ion-icon>
+      <h3>No se encontraron productos</h3>
+      <p>Intenta cambiar los filtros de búsqueda</p>
+      <ion-button fill="outline" (click)="limpiarFiltros()">
+        <ion-icon name="refresh" slot="start"></ion-icon>
+        Limpiar Filtros
+      </ion-button>
+    </div>
+
+    <!-- Grid de productos -->
+    <div class="productos-grid" *ngIf="!loading && productosFiltrados.length > 0">
+      <ion-card
+        class="producto-card hover-lift premium-float"
+        *ngFor="let producto of productosFiltrados"
+        (click)="verProducto(producto)">
+        <div class="producto-imagen">
+          <img [src]="producto.imagenes[0] || '/assets/images/producto-default.jpg'" [alt]="producto.nombre">
+          <div class="oferta-badge" *ngIf="tieneOferta(producto)">
+            -{{ getDescuento(producto) }}%
+          </div>
+        </div>
+
+        <ion-card-content class="producto-content">
+          <div class="producto-info">
+            <h3 class="producto-nombre">{{ producto.nombre }}</h3>
+            <p class="producto-criadero">{{ producto.criaderoNombre }}</p>
+            <p class="producto-descripcion">{{ producto.descripcion | slice:0:60 }}...</p>
+          </div>
+
+          <div class="producto-precio">
+            <span class="precio-actual">{{ formatearPrecio(getPrecioFinal(producto)) }}</span>
+            <span class="precio-anterior" *ngIf="tieneOferta(producto)">
+              {{ formatearPrecio(producto.precio) }}
+            </span>
+          </div>
+
+          <div class="producto-stock">
+            <span [class]="producto.stock > 0 ? 'stock-disponible' : 'stock-agotado'">
+              {{ producto.stock > 0 ? 'Disponible' : 'Agotado' }}
+            </span>
+          </div>
+
+          <ion-button
+            fill="solid"
+            size="small"
+            [disabled]="producto.stock === 0"
+            (click)="agregarAlCarrito(producto); $event.stopPropagation()"
+            class="agregar-carrito-btn">
+            <ion-icon name="bag-add" slot="start"></ion-icon>
+            Agregar al Carrito
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer-section">
+    <div class="footer-content">
+      <p class="footer-text">
+        <ion-icon name="shield-checkmark-outline"></ion-icon>
+        Compra segura con encriptación SSL
+      </p>
+      <p class="footer-envio">
+        <ion-icon name="airplane-outline"></ion-icon>
+        Envío gratuito en compras superiores a $200.000
+      </p>
+    </div>
+  </div>
+</ion-content>

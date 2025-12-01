@@ -1,0 +1,35 @@
+<ion-card class="product-card">
+  <img [src]="product.imageUrl" alt="{{ product.name }}" class="product-image">
+  
+  <ion-card-header>
+    <ion-card-title>{{ product.name }}</ion-card-title>
+  </ion-card-header>
+
+  <ion-card-content>
+    <p class="product-description">{{ product.description }}</p>
+    
+    <div class="product-footer">
+      <div class="price-section">
+        <span class="price">{{ formattedPrice() }}</span>
+      </div>
+
+      <div *ngIf="showQuantityControls" class="quantity-controls">
+        <ion-button fill="clear" size="small" (click)="decreaseQuantity()">
+          <ion-icon slot="icon-only" [icon]="removeCircleOutline"></ion-icon>
+        </ion-button>
+        <ion-badge color="primary">{{ quantity }}</ion-badge>
+        <ion-button fill="clear" size="small" (click)="increaseQuantity()">
+          <ion-icon slot="icon-only" [icon]="addCircleOutline"></ion-icon>
+        </ion-button>
+      </div>
+
+      <ion-button 
+        expand="full" 
+        color="success"
+        (click)="onAddToCart()"
+        class="add-button">
+        Añadir al carrito
+      </ion-button>
+    </div>
+  </ion-card-content>
+</ion-card>

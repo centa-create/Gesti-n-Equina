@@ -1,0 +1,126 @@
+.location-container {
+  max-width: 100%;
+
+  .error-banner {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    color: #721c24;
+    padding: 1rem;
+    margin-bottom: 1rem;
+
+    p {
+      margin: 0;
+      font-weight: 500;
+    }
+  }
+
+  .current-location {
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+
+    ion-card-header {
+      background: transparent;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+
+      ion-card-title {
+        color: white;
+      }
+    }
+
+    ion-card-content {
+      .location-info {
+        margin-bottom: 1.5rem;
+
+        .info-row {
+          display: flex;
+          justify-content: space-between;
+          padding: 0.75rem 0;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+          &:last-child {
+            border-bottom: none;
+          }
+
+          .label {
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+          }
+
+          .value {
+            color: white;
+            font-family: monospace;
+            font-weight: 500;
+          }
+        }
+      }
+
+      .map-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+    }
+  }
+
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .history-section {
+    h2 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #999;
+      padding: 2rem 1rem;
+    }
+
+    .history-item {
+      background: #f9f9f9;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+
+      .history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+
+        .timestamp {
+          font-size: 0.85rem;
+          color: #999;
+          font-weight: 600;
+        }
+      }
+
+      .history-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+
+        .coords {
+          font-family: monospace;
+          color: #333;
+          font-weight: 500;
+        }
+
+        .accuracy {
+          font-size: 0.85rem;
+          color: #666;
+        }
+      }
+    }
+  }
+}

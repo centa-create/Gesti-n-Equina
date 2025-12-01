@@ -1,0 +1,171 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Gestión de Herrajes</ion-title>
+    <ion-buttons slot="end" *ngIf="canEdit">
+      <ion-button (click)="toggleForm()">
+        <ion-icon name="add"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Herrajes</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <!-- Lista de herrajes -->
+  <ion-list>
+    <ion-item *ngFor="let herraje of herrajes" lines="full">
+      <ion-label>
+        <h2>{{ herraje.nombre }}</h2>
+        <p>Tipo: {{ herraje.tipo }} | Stock: {{ herraje.stockActual }}</p>
+        <p>Precio: {{ formatPrecio(herraje.precioUnitario) }}</p>
+        <p *ngIf="herraje.descripcion">{{ herraje.descripcion }}</p>
+        <p>Proveedor: {{ getProveedorNombre(herraje.proveedorId) }}</p>
+        <p>Stock mínimo: {{ herraje.stockMinimo }}</p>
+        <p>Estado: <span [class]="herraje.activo ? 'text-success' : 'text-danger'">
+          {{ herraje.activo ? 'Activo' : 'Inactivo' }}
+        </span></p>
+      </ion-label>
+      <ion-button fill="clear" slot="end" color="primary" *ngIf="canEdit" (click)="editarHerraje(herraje)">
+        <ion-icon name="create"></ion-icon>
+      </ion-button>
+      <ion-button fill="clear" slot="end" color="danger" *ngIf="canEdit" (click)="eliminarHerraje(herraje.id)">
+        <ion-icon name="trash"></ion-icon>
+      </ion-button>
+    </ion-item>
+  </ion-list>
+
+  <!-- Formulario para agregar/editar herraje -->
+  <ion-card *ngIf="showForm && canEdit">
+    <ion-card-header>
+      <ion-card-title>{{ nuevoHerraje.id ? 'Editar' : 'Agregar' }} Herraje</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <form (ngSubmit)="agregarHerraje()">
+        <ion-item>
+          <ion-input
+            label="Nombre"
+            [(ngModel)]="nuevoHerraje.nombre"
+            name="nombre"
+            required
+            placeholder="Nombre del herraje">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-select
+            label="Tipo"
+            [(ngModel)]="nuevoHerraje.tipo"
+            name="tipo"
+            required>
+            <ion-select-option value="herradura">Herradura</ion-select-option>
+            <ion-select-option value="clavo">Clavo</ion-select-option>
+            <ion-select-option value="martillo">Martillo</ion-select-option>
+            <ion-select-option value="tenaza">Tenaza</ion-select-option>
+            <ion-select-option value="limas">Limas</ion-select-option>
+            <ion-select-option value="otros">Otros</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-textarea
+            label="Descripción"
+            [(ngModel)]="nuevoHerraje.descripcion"
+            name="descripcion"
+            placeholder="Descripción del herraje"
+            rows="2">
+          </ion-textarea>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Precio unitario"
+            type="number"
+            [(ngModel)]="nuevoHerraje.precioUnitario"
+            name="precioUnitario"
+            step="0.01"
+            placeholder="0.00">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Stock actual"
+            type="number"
+            [(ngModel)]="nuevoHerraje.stockActual"
+            name="stockActual"
+            placeholder="0">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Stock mínimo"
+            type="number"
+            [(ngModel)]="nuevoHerraje.stockMinimo"
+            name="stockMinimo"
+            placeholder="0">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-select
+            label="Proveedor"
+            [(ngModel)]="nuevoHerraje.proveedorId"
+            name="proveedorId">
+            <ion-select-option value="">Sin proveedor</ion-select-option>
+            <ion-select-option *ngFor="let proveedor of proveedores" [value]="proveedor.id">
+              {{ proveedor.nombre }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-toggle
+            [(ngModel)]="nuevoHerraje.activo"
+            name="activo">
+            Herraje activo
+          </ion-toggle>
+        </ion-item>
+
+        <div class="ion-padding">
+          <ion-button
+            type="submit"
+            expand="full"
+            [disabled]="!nuevoHerraje.nombre || !nuevoHerraje.tipo">
+            <ion-icon *ngIf="false" name="refresh" slot="start"></ion-icon>
+            {{ nuevoHerraje.id ? 'Actualizar' : 'Crear' }} Herraje
+          </ion-button>
+          <ion-button
+            fill="clear"
+            expand="full"
+            color="medium"
+            (click)="toggleForm()">
+            Cancelar
+          </ion-button>
+        </div>
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Mensaje cuando no hay herrajes -->
+  <ion-card *ngIf="herrajes.length === 0">
+    <ion-card-content class="ion-text-center">
+      <ion-icon name="hammer-outline" size="large" color="medium"></ion-icon>
+      <h3>No hay herrajes</h3>
+      <p *ngIf="canEdit">Registra tu primer herraje para comenzar</p>
+      <p *ngIf="!canEdit">No tienes permisos para gestionar herrajes</p>
+      <ion-button *ngIf="canEdit" (click)="toggleForm()">
+        <ion-icon name="add" slot="start"></ion-icon>
+        Agregar Herraje
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

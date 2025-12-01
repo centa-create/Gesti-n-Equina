@@ -1,0 +1,133 @@
+<!-- Componente de Gráficas Premium con Efectos Avanzados -->
+<div class="premium-chart-container glass-premium premium-float depth-premium-2"
+     [class.loading]="loading"
+     [class.error]="error">
+
+  <!-- Header con controles -->
+  <div class="chart-header" *ngIf="config?.title">
+    <div class="chart-title-section">
+      <div class="chart-icon">
+        <ion-icon name="bar-chart" color="primary"></ion-icon>
+      </div>
+      <div class="chart-text">
+        <h3 class="chart-title text-premium-gradient">{{ config.title }}</h3>
+        <p class="chart-subtitle" *ngIf="config.subtitle">{{ config.subtitle }}</p>
+      </div>
+    </div>
+
+    <div class="chart-controls" *ngIf="options.showExport || options.showFullscreen || options.showRefresh">
+      <ion-button
+        fill="clear"
+        size="small"
+        (click)="exportChart()"
+        *ngIf="options.showExport"
+        class="control-btn hover-lift">
+        <ion-icon name="download" slot="icon-only" color="primary"></ion-icon>
+      </ion-button>
+
+      <ion-button
+        fill="clear"
+        size="small"
+        (click)="toggleFullscreen()"
+        *ngIf="options.showFullscreen"
+        class="control-btn hover-lift">
+        <ion-icon name="expand" slot="icon-only" color="primary"></ion-icon>
+      </ion-button>
+
+      <ion-button
+        fill="clear"
+        size="small"
+        (click)="refreshChart()"
+        *ngIf="options.showRefresh"
+        class="control-btn hover-lift">
+        <ion-icon name="refresh" slot="icon-only" color="primary"></ion-icon>
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- Contenedor del gráfico -->
+  <div class="chart-wrapper" [style.height]="getChartHeight()">
+    <!-- Estado de carga -->
+    <div *ngIf="loading" class="chart-loading">
+      <div class="loading-spinner">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p>Cargando gráfica...</p>
+      </div>
+    </div>
+
+    <!-- Estado de error -->
+    <div *ngIf="error && !loading" class="chart-error">
+      <div class="error-content">
+        <ion-icon name="alert-circle" color="danger"></ion-icon>
+        <h4>Error al cargar la gráfica</h4>
+        <p>{{ error }}</p>
+        <ion-button fill="outline" (click)="refreshChart()">
+          <ion-icon name="refresh" slot="start"></ion-icon>
+          Reintentar
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Gráfico Chart.js -->
+    <div *ngIf="!loading && !error" class="chart-canvas-container">
+      <canvas
+        baseChart
+        [type]="chartType"
+        [data]="chartData"
+        [options]="chartOptions"
+        class="chart-canvas">
+      </canvas>
+
+      <!-- Overlay de efectos premium -->
+      <div class="chart-overlay">
+        <div class="chart-particles">
+          <div class="particle particle-1"></div>
+          <div class="particle particle-2"></div>
+          <div class="particle particle-3"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer con información adicional -->
+  <div class="chart-footer" *ngIf="!loading && !error">
+    <div class="chart-stats">
+      <div class="stat-item">
+        <span class="stat-label">Total de datos:</span>
+        <span class="stat-value">{{ config?.data?.length || 0 }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Series:</span>
+        <span class="stat-value">{{ config?.datasets?.length || 0 }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Tipo:</span>
+        <span class="stat-value">{{ chartType | titlecase }}</span>
+      </div>
+    </div>
+
+    <div class="chart-legend-mobile" *ngIf="config?.showLegend && (config?.datasets?.length || 0) > 0">
+      <div class="legend-item" *ngFor="let dataset of config.datasets; let i = index">
+        <div class="legend-color" [style.background-color]="dataset.borderColor || getDefaultColor(i)"></div>
+        <span class="legend-label">{{ dataset.label }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de pantalla completa (futuro) -->
+<!-- <ion-modal [isOpen]="fullscreenMode" class="fullscreen-modal">
+  <ng-template>
+    <div class="fullscreen-chart">
+      <div class="fullscreen-header">
+        <h2>{{ config?.title }}</h2>
+        <ion-button fill="clear" (click)="exitFullscreen()">
+          <ion-icon name="close" slot="icon-only"></ion-icon>
+        </ion-button>
+      </div>
+      <div class="fullscreen-canvas">
+        <canvas baseChart [type]="chartType" [data]="chartData" [options]="fullscreenOptions"></canvas>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal> -->

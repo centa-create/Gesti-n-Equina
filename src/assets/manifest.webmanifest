@@ -1,0 +1,16 @@
+{
+  "name": "Gestión Equina",
+  "short_name": "Gestión Equina",
+  "description": "Sistema de gestión para criaderos equinos",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3880ff",
+  "icons": [
+    {
+      "src": "assets/icon/favicon.png",
+      "sizes": "any",
+      "type": "image/png"
+    }
+  ]
+}

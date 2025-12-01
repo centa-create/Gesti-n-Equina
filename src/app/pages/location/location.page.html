@@ -1,0 +1,115 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Geolocalización</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="location-container">
+    <!-- Mensaje de error -->
+    <div *ngIf="errorMessage" class="error-banner">
+      <p>{{ errorMessage }}</p>
+    </div>
+
+    <!-- Ubicación actual -->
+    <ion-card *ngIf="currentLocation" class="current-location">
+      <ion-card-header>
+        <ion-card-title>Ubicación Actual</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="location-info">
+          <div class="info-row">
+            <span class="label">Latitud:</span>
+            <span class="value">{{ currentLocation.latitude.toFixed(6) }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Longitud:</span>
+            <span class="value">{{ currentLocation.longitude.toFixed(6) }}</span>
+          </div>
+          <div class="info-row" *ngIf="currentLocation.accuracy">
+            <span class="label">Precisión:</span>
+            <span class="value">{{ currentLocation.accuracy.toFixed(2) }} m</span>
+          </div>
+          <div class="info-row" *ngIf="currentLocation.altitude">
+            <span class="label">Altitud:</span>
+            <span class="value">{{ currentLocation.altitude.toFixed(2) }} m</span>
+          </div>
+          <div class="info-row" *ngIf="currentLocation.speed">
+            <span class="label">Velocidad:</span>
+            <span class="value">{{ currentLocation.speed.toFixed(2) }} m/s</span>
+          </div>
+        </div>
+
+        <div class="map-buttons">
+          <ion-button expand="full" color="primary" (click)="openInMaps()">
+            Ver en Google Maps
+          </ion-button>
+          <ion-button expand="full" fill="outline" color="primary" (click)="openInOpenStreetMap()">
+            Ver en OpenStreetMap
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Botones de acción -->
+    <div class="action-buttons">
+      <ion-button 
+        expand="full" 
+        color="success"
+        (click)="getCurrentLocation()"
+        [disabled]="isLoading || isTracking">
+        <ion-icon slot="start" [icon]="locationOutline"></ion-icon>
+        Obtener Ubicación Actual
+        <ion-spinner *ngIf="isLoading" slot="end" name="crescent"></ion-spinner>
+      </ion-button>
+
+      <ion-button 
+        *ngIf="!isTracking"
+        expand="full" 
+        color="warning"
+        (click)="startTracking()">
+        <ion-icon slot="start" [icon]="reloadOutline"></ion-icon>
+        Iniciar Seguimiento
+      </ion-button>
+
+      <ion-button 
+        *ngIf="isTracking"
+        expand="full" 
+        color="danger"
+        (click)="stopTracking()">
+        <ion-icon slot="start" [icon]="stopCircleOutline"></ion-icon>
+        Detener Seguimiento
+      </ion-button>
+    </div>
+
+    <!-- Historial de ubicaciones -->
+    <div class="history-section">
+      <h2>Historial de Ubicaciones ({{ locationHistory.length }})</h2>
+
+      <ion-card *ngIf="locationHistory.length === 0" class="empty-state">
+        <ion-card-content class="ion-text-center">
+          <p>No hay historial de ubicaciones aún.</p>
+        </ion-card-content>
+      </ion-card>
+
+      <div *ngFor="let location of locationHistory | slice: -5" class="history-item">
+        <div class="history-header">
+          <span class="timestamp">{{ location.timestamp | date: 'HH:mm:ss' }}</span>
+        </div>
+        <div class="history-content">
+          <span class="coords">{{ location.latitude.toFixed(4) }}, {{ location.longitude.toFixed(4) }}</span>
+          <span class="accuracy" *ngIf="location.accuracy">±{{ location.accuracy.toFixed(0) }}m</span>
+        </div>
+      </div>
+
+      <ion-button 
+        *ngIf="locationHistory.length > 0"
+        expand="full" 
+        fill="outline"
+        color="danger"
+        (click)="clearHistory()">
+        Limpiar Historial
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

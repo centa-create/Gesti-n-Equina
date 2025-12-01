@@ -1,0 +1,50 @@
+<ion-card class="rider-card">
+  <ion-card-header>
+    <div class="header-title">
+      <ion-card-title class="rider-name">{{ rider.name }}</ion-card-title>
+      <ion-badge [color]="getAvailabilityColor()">
+        {{ getAvailabilityText() }}
+      </ion-badge>
+    </div>
+    <p class="rider-specialty">{{ rider.specialty }}</p>
+  </ion-card-header>
+
+  <ion-card-content>
+    <div class="rider-info">
+      <div *ngIf="rider.experience" class="info-row">
+        <span class="label">Experiencia:</span>
+        <span class="value">{{ rider.experience }} años</span>
+      </div>
+
+      <div *ngIf="rider.hourlyRate" class="info-row">
+        <span class="label">Tarifa/hora:</span>
+        <span class="value">{{ formattedRate() }}</span>
+      </div>
+
+      <div *ngIf="rider.phone" class="info-row contact-row">
+        <ion-icon [icon]="callOutline" class="contact-icon"></ion-icon>
+        <span class="contact-value">{{ rider.phone }}</span>
+      </div>
+
+      <div *ngIf="rider.email" class="info-row contact-row">
+        <ion-icon [icon]="mailOutline" class="contact-icon"></ion-icon>
+        <span class="contact-value">{{ rider.email }}</span>
+      </div>
+    </div>
+
+    <div *ngIf="showActions" class="actions">
+      <ion-button fill="clear" size="small" color="primary" (click)="onViewDetails()">
+        <ion-icon slot="start" [icon]="eyeOutline"></ion-icon>
+        Ver
+      </ion-button>
+      <ion-button fill="clear" size="small" color="warning" (click)="onEdit()">
+        <ion-icon slot="start" [icon]="createOutline"></ion-icon>
+        Editar
+      </ion-button>
+      <ion-button fill="clear" size="small" color="danger" (click)="onDelete()">
+        <ion-icon slot="start" [icon]="trashOutline"></ion-icon>
+        Eliminar
+      </ion-button>
+    </div>
+  </ion-card-content>
+</ion-card>

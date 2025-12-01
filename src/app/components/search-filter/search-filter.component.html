@@ -1,0 +1,174 @@
+<!-- Componente de Búsqueda y Filtros Avanzados Premium -->
+<div class="search-filter-container glass-premium premium-float">
+  <!-- Barra de búsqueda principal -->
+  <div class="search-bar">
+    <ion-item class="search-input-item" lines="none">
+      <ion-icon name="search" slot="start" color="medium"></ion-icon>
+      <ion-input
+        [placeholder]="config.placeholder"
+        [(ngModel)]="filters.searchText"
+        (ionInput)="onSearchInput($event)"
+        (keyup.enter)="onSearchClick()"
+        class="search-input">
+      </ion-input>
+      <ion-button
+        fill="clear"
+        slot="end"
+        (click)="onSearchClick()"
+        class="search-btn">
+        <ion-icon name="search" color="primary"></ion-icon>
+      </ion-button>
+    </ion-item>
+
+    <!-- Botón de filtros avanzados -->
+    <ion-button
+      fill="outline"
+      size="default"
+      (click)="toggleAdvancedFilters()"
+      class="filter-toggle-btn">
+      <ion-icon name="filter" slot="start"></ion-icon>
+      Filtros
+      <ion-badge *ngIf="getActiveFiltersCount() > 0" color="primary" slot="end">
+        {{ getActiveFiltersCount() }}
+      </ion-badge>
+      <ion-icon [name]="showAdvancedFilters ? 'chevron-up' : 'chevron-down'" slot="end"></ion-icon>
+    </ion-button>
+  </div>
+
+  <!-- Panel de filtros avanzados -->
+  <div class="advanced-filters" *ngIf="showAdvancedFilters" @slideDown>
+    <ion-card class="filters-card depth-premium-2">
+      <ion-card-header class="filters-header">
+        <ion-card-title class="text-premium-gradient">
+          <ion-icon name="options" color="primary"></ion-icon>
+          {{ config.title }}
+        </ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content class="filters-content">
+        <ion-grid>
+          <!-- Fila 1: Fechas -->
+          <ion-row *ngIf="config.showDateRange">
+            <ion-col size="12" size-md="6">
+              <ion-item class="filter-item">
+                <ion-label position="floating">Fecha Desde</ion-label>
+                <ion-datetime
+                  [(ngModel)]="filters.dateFrom"
+                  (ionChange)="onFilterChange()"
+                  displayFormat="DD/MM/YYYY"
+                  pickerFormat="DD/MM/YYYY"
+                  placeholder="Seleccionar fecha">
+                </ion-datetime>
+              </ion-item>
+            </ion-col>
+
+            <ion-col size="12" size-md="6">
+              <ion-item class="filter-item">
+                <ion-label position="floating">Fecha Hasta</ion-label>
+                <ion-datetime
+                  [(ngModel)]="filters.dateTo"
+                  (ionChange)="onFilterChange()"
+                  displayFormat="DD/MM/YYYY"
+                  pickerFormat="DD/MM/YYYY"
+                  placeholder="Seleccionar fecha">
+                </ion-datetime>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+
+          <!-- Fila 2: Categoría y Estado -->
+          <ion-row *ngIf="config.showCategory || config.showStatus">
+            <ion-col size="12" size-md="6" *ngIf="config.showCategory">
+              <ion-item class="filter-item">
+                <ion-label position="floating">Categoría</ion-label>
+                <ion-select
+                  [(ngModel)]="filters.category"
+                  (ionChange)="onFilterChange()"
+                  placeholder="Seleccionar categoría">
+                  <ion-select-option value="">Todas las categorías</ion-select-option>
+                  <ion-select-option
+                    *ngFor="let cat of config.categories"
+                    [value]="cat.value">
+                    {{ cat.label }}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+            </ion-col>
+
+            <ion-col size="12" size-md="6" *ngIf="config.showStatus">
+              <ion-item class="filter-item">
+                <ion-label position="floating">Estado</ion-label>
+                <ion-select
+                  [(ngModel)]="filters.status"
+                  (ionChange)="onFilterChange()"
+                  placeholder="Seleccionar estado">
+                  <ion-select-option value="">Todos los estados</ion-select-option>
+                  <ion-select-option
+                    *ngFor="let stat of config.statuses"
+                    [value]="stat.value">
+                    {{ stat.label }}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+
+          <!-- Fila 3: Ordenamiento -->
+          <ion-row *ngIf="config.showSort">
+            <ion-col size="12" size-md="6">
+              <ion-item class="filter-item">
+                <ion-label position="floating">Ordenar por</ion-label>
+                <ion-select
+                  [(ngModel)]="filters.sortBy"
+                  (ionChange)="onFilterChange()">
+                  <ion-select-option
+                    *ngFor="let sort of config.sortOptions"
+                    [value]="sort.value">
+                    {{ sort.label }}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+            </ion-col>
+
+            <ion-col size="12" size-md="6">
+              <ion-item class="filter-item">
+                <ion-label position="floating">Orden</ion-label>
+                <ion-select
+                  [(ngModel)]="filters.sortOrder"
+                  (ionChange)="onFilterChange()">
+                  <ion-select-option value="asc">Ascendente</ion-select-option>
+                  <ion-select-option value="desc">Descendente</ion-select-option>
+                </ion-select>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+
+          <!-- Fila 4: Botones de acción -->
+          <ion-row>
+            <ion-col size="12">
+              <div class="filter-actions">
+                <ion-button
+                  fill="outline"
+                  color="medium"
+                  (click)="clearFilters()"
+                  class="clear-btn">
+                  <ion-icon name="trash" slot="start"></ion-icon>
+                  Limpiar Filtros
+                </ion-button>
+
+                <ion-button
+                  fill="solid"
+                  color="primary"
+                  (click)="onSearchClick()"
+                  class="search-btn">
+                  <ion-icon name="search" slot="start"></ion-icon>
+                  Buscar
+                </ion-button>
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</div>

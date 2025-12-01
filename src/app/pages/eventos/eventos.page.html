@@ -1,0 +1,226 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Gestión de Eventos</ion-title>
+    <ion-buttons slot="end" *ngIf="canEdit">
+      <ion-button (click)="toggleForm()">
+        <ion-icon name="add"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Filtros avanzados -->
+  <app-advanced-filters
+    [config]="filtrosConfig"
+    [values]="filtrosValues"
+    [isExpanded]="filtrosExpanded"
+    (valuesChange)="onFiltrosChange($event)"
+    (toggle)="onFiltrosToggle($event)"
+    (clear)="onFiltrosClear()"
+    (apply)="onFiltrosApply($event)">
+  </app-advanced-filters>
+
+  <!-- Estadísticas -->
+  <ion-card class="stats-card" *ngIf="eventosFiltrados.length > 0">
+    <ion-card-content>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <ion-icon name="calendar" color="primary"></ion-icon>
+          <div>
+            <h3>{{ eventosFiltrados.length }}</h3>
+            <p>Eventos {{ filtrosValues['estado'] ? filtrosValues['estado'] + 's' : 'totales' }}</p>
+          </div>
+        </div>
+        <div class="stat-item">
+          <ion-icon name="time" color="secondary"></ion-icon>
+          <div>
+            <h3>{{ getEventosProximos() }}</h3>
+            <p>Próximos (7 días)</p>
+          </div>
+        </div>
+        <div class="stat-item">
+          <ion-icon name="checkmark-circle" color="success"></ion-icon>
+          <div>
+            <h3>{{ getEventosCompletados() }}</h3>
+            <p>Completados</p>
+          </div>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Loading Spinner -->
+  <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+
+  <!-- Lista de Eventos -->
+  <ion-list *ngIf="!isLoading">
+    <ion-item *ngFor="let evento of eventosFiltrados" lines="full">
+      <ion-label>
+        <h2>{{ evento.titulo }}</h2>
+        <p>{{ getFechaFormateada(evento.fechaInicio) }}</p>
+        <p *ngIf="evento.descripcion">{{ evento.descripcion }}</p>
+        <p *ngIf="evento.ubicacion">📍 {{ evento.ubicacion }}</p>
+        <p *ngIf="evento.caballoId">🐎 {{ getNombreCaballo(evento.caballoId) }}</p>
+        <p *ngIf="evento.tipo">🏷️ {{ getTipoLabel(evento.tipo) }}</p>
+      </ion-label>
+      <ion-chip slot="end" [color]="getEstadoColor(evento.estado)">
+        {{ evento.estado | titlecase }}
+      </ion-chip>
+      <ion-button slot="end" fill="clear" color="primary" *ngIf="canEdit" (click)="editarEvento(evento); $event.stopPropagation()">
+        <ion-icon name="create"></ion-icon>
+      </ion-button>
+      <ion-button slot="end" fill="clear" color="danger" *ngIf="canEdit" (click)="eliminarEvento(evento.id); $event.stopPropagation()">
+        <ion-icon name="trash"></ion-icon>
+      </ion-button>
+    </ion-item>
+  </ion-list>
+
+  <!-- Formulario para Evento -->
+  <ion-card *ngIf="showForm && canEdit">
+    <ion-card-header>
+      <ion-card-title>{{ nuevoEvento.id ? 'Editar' : 'Nuevo' }} Evento</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <form (ngSubmit)="agregarEvento()">
+        <ion-item>
+          <ion-input
+            label="Título del evento"
+            [(ngModel)]="nuevoEvento.titulo"
+            name="titulo"
+            required
+            placeholder="Ej: Competencia Nacional">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-datetime
+            label="Fecha y hora de inicio"
+            [(ngModel)]="nuevoEvento.fechaInicio"
+            name="fechaInicio"
+            presentation="date-time"
+            required>
+          </ion-datetime>
+        </ion-item>
+
+        <ion-item>
+          <ion-select
+            label="Tipo de evento"
+            [(ngModel)]="nuevoEvento.tipo"
+            name="tipo"
+            placeholder="Seleccionar tipo">
+            <ion-select-option value="cita_veterinaria">Cita Veterinaria</ion-select-option>
+            <ion-select-option value="competicion">Competición</ion-select-option>
+            <ion-select-option value="entrenamiento">Entrenamiento</ion-select-option>
+            <ion-select-option value="reproduccion">Reproducción</ion-select-option>
+            <ion-select-option value="mantenimiento">Mantenimiento</ion-select-option>
+            <ion-select-option value="otros">Otros</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-select
+            label="Estado"
+            [(ngModel)]="nuevoEvento.estado"
+            name="estado"
+            placeholder="Seleccionar estado">
+            <ion-select-option value="pendiente">Pendiente</ion-select-option>
+            <ion-select-option value="confirmado">Confirmado</ion-select-option>
+            <ion-select-option value="completado">Completado</ion-select-option>
+            <ion-select-option value="cancelado">Cancelado</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Descripción"
+            [(ngModel)]="nuevoEvento.descripcion"
+            name="descripcion"
+            placeholder="Descripción del evento">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Ubicación"
+            [(ngModel)]="nuevoEvento.ubicacion"
+            name="ubicacion"
+            placeholder="Lugar del evento">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Responsable"
+            [(ngModel)]="nuevoEvento.responsable"
+            name="responsable"
+            placeholder="Persona responsable">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Costo"
+            type="number"
+            [(ngModel)]="nuevoEvento.costo"
+            name="costo"
+            placeholder="Costo estimado">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Duración (horas)"
+            type="number"
+            [(ngModel)]="nuevoEvento.duracionHoras"
+            name="duracionHoras"
+            placeholder="Duración en horas">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-textarea
+            label="Notas"
+            [(ngModel)]="nuevoEvento.notas"
+            name="notas"
+            placeholder="Notas adicionales"
+            rows="3">
+          </ion-textarea>
+        </ion-item>
+
+        <div class="ion-padding">
+          <ion-button
+            type="submit"
+            expand="full"
+            [disabled]="isLoading || !nuevoEvento.titulo || !nuevoEvento.fechaInicio">
+            <ion-icon *ngIf="isLoading" name="refresh" slot="start"></ion-icon>
+            {{ isLoading ? 'Guardando...' : (nuevoEvento.id ? 'Actualizar' : 'Crear') + ' Evento' }}
+          </ion-button>
+          <ion-button
+            fill="clear"
+            expand="full"
+            color="medium"
+            (click)="toggleForm()">
+            Cancelar
+          </ion-button>
+        </div>
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Mensaje cuando no hay eventos -->
+  <ion-card *ngIf="!isLoading && eventos.length === 0">
+    <ion-card-content class="ion-text-center">
+      <ion-icon name="calendar-outline" size="large" color="medium"></ion-icon>
+      <h3>No hay eventos</h3>
+      <p>Crea tu primer evento para comenzar</p>
+      <ion-button (click)="toggleForm()">
+        <ion-icon name="add" slot="start"></ion-icon>
+        Crear Evento
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

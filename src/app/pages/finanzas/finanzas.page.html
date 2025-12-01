@@ -1,0 +1,222 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Finanzas de {{ criaderoActivo?.nombre }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleForm()">
+        <ion-icon name="add"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Loading Spinner -->
+  <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+
+  <!-- Resumen Financiero -->
+  <div *ngIf="resumen && !isLoading">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Resumen Financiero</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="4">
+              <div class="metric-card">
+                <h3 class="metric-value success">{{ formatMonto(resumen.totalIngresos) }}</h3>
+                <p class="metric-label">Ingresos</p>
+              </div>
+            </ion-col>
+            <ion-col size="4">
+              <div class="metric-card">
+                <h3 class="metric-value danger">{{ formatMonto(resumen.totalGastos) }}</h3>
+                <p class="metric-label">Gastos</p>
+              </div>
+            </ion-col>
+            <ion-col size="4">
+              <div class="metric-card">
+                <h3 class="metric-value" [class]="resumen.balance >= 0 ? 'success' : 'danger'">
+                  {{ formatMonto(resumen.balance) }}
+                </h3>
+                <p class="metric-label">Balance</p>
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Filtros -->
+  <ion-card *ngIf="!isLoading">
+    <ion-card-content>
+      <ion-item>
+        <ion-label>Filtrar por tipo:</ion-label>
+        <ion-select [(ngModel)]="filtroTipo">
+          <ion-select-option value="todos">Todos</ion-select-option>
+          <ion-select-option value="ingreso">Ingresos</ion-select-option>
+          <ion-select-option value="gasto">Gastos</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-item>
+        <ion-label>Filtrar por categoría:</ion-label>
+        <ion-select [(ngModel)]="filtroCategoria">
+          <ion-select-option value="">Todas las categorías</ion-select-option>
+          <ion-select-option *ngFor="let cat of categorias" [value]="cat.id">
+            {{ cat.nombre }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Lista de Transacciones -->
+  <ion-list *ngIf="!isLoading">
+    <ion-item *ngFor="let transaccion of transaccionesFiltradas" lines="full">
+      <ion-label>
+        <h2>{{ transaccion.descripcion }}</h2>
+        <p>{{ getCategoriaNombre(transaccion.categoria) }}</p>
+        <p>{{ transaccion.fecha | date:'short' }}</p>
+        <p *ngIf="transaccion.proveedor">Proveedor: {{ transaccion.proveedor }}</p>
+      </ion-label>
+      <ion-chip slot="end" [color]="getTipoColor(transaccion.tipo)">
+        {{ transaccion.tipo === 'ingreso' ? '+' : '-' }}{{ formatMonto(transaccion.monto) }}
+      </ion-chip>
+      <ion-button slot="end" fill="clear" color="danger" (click)="eliminarTransaccion(transaccion.id)">
+        <ion-icon name="trash"></ion-icon>
+      </ion-button>
+    </ion-item>
+  </ion-list>
+
+  <!-- Formulario Nueva Transacción -->
+  <ion-card *ngIf="showForm">
+    <ion-card-header>
+      <ion-card-title>Nueva Transacción</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <form (ngSubmit)="crearTransaccion()">
+        <ion-item>
+          <ion-select
+            label="Tipo"
+            [(ngModel)]="nuevaTransaccion.tipo"
+            name="tipo"
+            required>
+            <ion-select-option value="ingreso">Ingreso</ion-select-option>
+            <ion-select-option value="gasto">Gasto</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-select
+            label="Categoría"
+            [(ngModel)]="nuevaTransaccion.categoria"
+            name="categoria"
+            required>
+            <ion-select-option
+              *ngFor="let cat of categorias"
+              [value]="cat.id"
+              [hidden]="cat.tipo !== nuevaTransaccion.tipo">
+              {{ cat.nombre }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Descripción"
+            [(ngModel)]="nuevaTransaccion.descripcion"
+            name="descripcion"
+            required
+            placeholder="Descripción de la transacción">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Monto"
+            type="number"
+            [(ngModel)]="nuevaTransaccion.monto"
+            name="monto"
+            required
+            placeholder="0">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-datetime
+            label="Fecha"
+            [(ngModel)]="nuevaTransaccion.fecha"
+            name="fecha"
+            presentation="date"
+            required>
+          </ion-datetime>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Proveedor"
+            [(ngModel)]="nuevaTransaccion.proveedor"
+            name="proveedor"
+            placeholder="Nombre del proveedor (opcional)">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-select
+            label="Método de pago"
+            [(ngModel)]="nuevaTransaccion.metodoPago"
+            name="metodoPago">
+            <ion-select-option value="efectivo">Efectivo</ion-select-option>
+            <ion-select-option value="transferencia">Transferencia</ion-select-option>
+            <ion-select-option value="tarjeta">Tarjeta</ion-select-option>
+            <ion-select-option value="cheque">Cheque</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-textarea
+            label="Notas"
+            [(ngModel)]="nuevaTransaccion.notas"
+            name="notas"
+            placeholder="Notas adicionales"
+            rows="2">
+          </ion-textarea>
+        </ion-item>
+
+        <div class="ion-padding">
+          <ion-button
+            type="submit"
+            expand="full"
+            [disabled]="isLoading || !nuevaTransaccion.descripcion || !nuevaTransaccion.monto || !nuevaTransaccion.tipo || !nuevaTransaccion.categoria">
+            <ion-icon *ngIf="isLoading" name="refresh" slot="start"></ion-icon>
+            {{ isLoading ? 'Guardando...' : 'Guardar Transacción' }}
+          </ion-button>
+          <ion-button
+            fill="clear"
+            expand="full"
+            color="medium"
+            (click)="toggleForm()">
+            Cancelar
+          </ion-button>
+        </div>
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Mensaje cuando no hay transacciones -->
+  <ion-card *ngIf="!isLoading && transaccionesFiltradas.length === 0">
+    <ion-card-content class="ion-text-center">
+      <ion-icon name="cash-outline" size="large" color="medium"></ion-icon>
+      <h3>No hay transacciones</h3>
+      <p>Registra tu primera transacción financiera</p>
+      <ion-button (click)="toggleForm()">
+        <ion-icon name="add" slot="start"></ion-icon>
+        Nueva Transacción
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

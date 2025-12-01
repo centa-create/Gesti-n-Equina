@@ -1,0 +1,373 @@
+<ion-content [fullscreen]="true" class="home-content app-background-premium">
+  <!-- Partículas flotantes -->
+  <div class="particles-premium"></div>
+
+  <!-- Header con información del usuario -->
+  <div class="header-section glass-premium premium-float">
+    <div class="user-info">
+      <div class="avatar">
+        <ion-icon name="person-circle-outline" size="large"></ion-icon>
+      </div>
+      <div class="user-details">
+        <h2>¡Bienvenido!</h2>
+        <p class="user-role" [class]="getRoleClass(userRole)">
+          <ion-icon [name]="getRoleIcon(userRole)"></ion-icon>
+          {{ getRoleDisplayName(userRole) }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección de bienvenida -->
+  <div class="welcome-section">
+    <div class="welcome-content">
+      <ion-icon name="home-outline" class="welcome-icon"></ion-icon>
+      <h1>🏇 Gestión Equina</h1>
+      <p>Sistema integral de gestión para criaderos equinos</p>
+    </div>
+  </div>
+
+  <!-- Estado de conexión mejorado -->
+  <div class="status-section">
+    <ion-card class="status-card" [class]="getConnectionStatusClass()">
+      <ion-card-content class="status-content">
+        <div class="status-header">
+          <ion-icon [name]="getConnectionIcon()" class="status-icon"></ion-icon>
+          <div>
+            <h3>{{ getConnectionTitle() }}</h3>
+            <p class="status-message">{{ mensaje }}</p>
+          </div>
+        </div>
+        <ion-button
+          fill="outline"
+          size="small"
+          (click)="testConnection()"
+          [disabled]="isLoading"
+          [color]="getConnectionButtonColor()">
+          <ion-icon *ngIf="isLoading" name="refresh" slot="start" class="spin"></ion-icon>
+          {{ isLoading ? 'Probando...' : 'Verificar Conexión' }}
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Dashboard de Producción -->
+  <div class="produccion-dashboard" *ngIf="produccionData.length > 0">
+    <div class="dashboard-header">
+      <h2 class="section-title">📊 Dashboard de Producción</h2>
+
+      <!-- Filtros para gráficas -->
+      <ion-card class="filtros-card">
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="filter" color="secondary"></ion-icon>
+            Filtros de Gráficas
+            <ion-button fill="clear" size="small" (click)="toggleFiltrosGraficas()" slot="end">
+              <ion-icon [name]="mostrarFiltrosGraficas ? 'chevron-up' : 'chevron-down'"></ion-icon>
+            </ion-button>
+          </ion-card-title>
+        </ion-card-header>
+
+        <ion-card-content *ngIf="mostrarFiltrosGraficas">
+          <ion-grid>
+            <ion-row>
+              <!-- Selector de Mes -->
+              <ion-col size="6" size-md="4">
+                <ion-item>
+                  <ion-label position="floating">Mes</ion-label>
+                  <ion-select
+                    [(ngModel)]="filtrosGraficas.mes"
+                    (ionChange)="onFiltrosGraficasChange()"
+                    placeholder="Todos los meses">
+                    <ion-select-option [value]="null">Todos los meses</ion-select-option>
+                    <ion-select-option *ngFor="let mes of getMeses()" [value]="mes.value">
+                      {{ mes.label }}
+                    </ion-select-option>
+                  </ion-select>
+                </ion-item>
+              </ion-col>
+
+              <!-- Selector de Año -->
+              <ion-col size="6" size-md="4">
+                <ion-item>
+                  <ion-label position="floating">Año</ion-label>
+                  <ion-select
+                    [(ngModel)]="filtrosGraficas.anio"
+                    (ionChange)="onFiltrosGraficasChange()"
+                    placeholder="Seleccionar año">
+                    <ion-select-option *ngFor="let anio of getAnios()" [value]="anio">
+                      {{ anio }}
+                    </ion-select-option>
+                  </ion-select>
+                </ion-item>
+              </ion-col>
+
+              <!-- Botón de reset -->
+              <ion-col size="12" size-md="4">
+                <ion-button
+                  expand="block"
+                  fill="outline"
+                  (click)="resetFiltrosGraficas()"
+                  class="reset-filtros-btn">
+                  <ion-icon name="refresh" slot="start"></ion-icon>
+                  Reset Filtros
+                </ion-button>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Estadísticas principales -->
+    <div class="stats-grid">
+      <ion-card class="stat-card ingresos hover-lift premium-glow">
+        <ion-card-content>
+          <div class="stat-icon">
+            <ion-icon name="trending-up" color="success"></ion-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ produccionStats.totalIngresos | currency:'COP':'symbol':'1.0-0' }}</h3>
+            <p>Ingresos Totales</p>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="stat-card costos hover-lift premium-morph">
+        <ion-card-content>
+          <div class="stat-icon">
+            <ion-icon name="cash" color="warning" class="animated-icon"></ion-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ produccionStats.totalCostos | currency:'COP':'symbol':'1.0-0' }}</h3>
+            <p>Costos Totales</p>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="stat-card beneficio hover-lift premium-glow" [class]="produccionStats.beneficioNeto >= 0 ? 'positive' : 'negative'">
+        <ion-card-content>
+          <div class="stat-icon">
+            <ion-icon name="wallet" [color]="produccionStats.beneficioNeto >= 0 ? 'success' : 'danger'" class="animated-icon"></ion-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ produccionStats.beneficioNeto | currency:'COP':'symbol':'1.0-0' }}</h3>
+            <p>Beneficio Neto</p>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="stat-card producciones hover-lift premium-float agri-dust">
+        <ion-card-content>
+          <div class="stat-icon">
+            <ion-icon name="leaf" color="tertiary" class="animated-icon"></ion-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ produccionStats.produccionesMes }}</h3>
+            <p>Producciones este mes</p>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Gráfico de producción mensual premium -->
+    <app-premium-charts
+      [config]="produccionChartConfig"
+      [options]="{ showExport: true, showRefresh: true, interactive: true }">
+    </app-premium-charts>
+
+    <!-- Acceso rápido a producción -->
+    <ion-card class="quick-access-card" button (click)="navigateTo('produccion')">
+      <ion-card-content>
+        <div class="quick-access-content">
+          <div class="quick-access-icon">
+            <ion-icon name="add-circle" color="secondary" size="large"></ion-icon>
+          </div>
+          <div class="quick-access-info">
+            <h3>Registrar Nueva Producción</h3>
+            <p>Agrega datos de producción agrícola</p>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="quick-access-arrow"></ion-icon>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Sección de módulos con diseño mejorado -->
+  <div class="modules-section">
+    <h2 class="section-title">📋 Módulos Disponibles</h2>
+
+    <!-- Módulos principales -->
+    <div class="modules-grid">
+      <!-- Búsqueda Global -->
+      <ion-card class="module-card info hover-lift premium-glow magnetic-premium" button (click)="navigateTo('busqueda')">
+        <div class="module-content">
+          <div class="module-icon">
+            <ion-icon name="search-circle"></ion-icon>
+          </div>
+          <div class="module-info">
+            <h3>Búsqueda Global</h3>
+            <p>Buscar en todos los módulos</p>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="module-arrow"></ion-icon>
+        </div>
+      </ion-card>
+
+      <ion-card class="module-card primary hover-lift premium-glow magnetic-premium" button (click)="navigateTo('criaderos')">
+        <div class="module-content">
+          <div class="module-icon">
+            <ion-icon name="business-outline"></ion-icon>
+          </div>
+          <div class="module-info">
+            <h3>Criaderos</h3>
+            <p>Gestiona tus instalaciones</p>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="module-arrow"></ion-icon>
+        </div>
+      </ion-card>
+
+      <ion-card class="module-card secondary hover-lift premium-float magnetic-premium" button (click)="navigateTo('caballos')">
+        <div class="module-content">
+          <div class="module-icon">
+            <ion-icon name="paw-outline" class="animated-icon"></ion-icon>
+          </div>
+          <div class="module-info">
+            <h3>Caballos</h3>
+            <p>Registro y seguimiento</p>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="module-arrow"></ion-icon>
+        </div>
+      </ion-card>
+
+      <ion-card class="module-card accent hover-lift premium-morph magnetic-premium" button (click)="navigateTo('eventos')">
+        <div class="module-content">
+          <div class="module-icon">
+            <ion-icon name="calendar-outline" class="animated-icon"></ion-icon>
+          </div>
+          <div class="module-info">
+            <h3>Eventos</h3>
+            <p>Calendario de actividades</p>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="module-arrow"></ion-icon>
+        </div>
+      </ion-card>
+
+      <ion-card class="module-card info hover-lift premium-glow magnetic-premium" button (click)="navigateTo('reportes')">
+        <div class="module-content">
+          <div class="module-icon">
+            <ion-icon name="bar-chart-outline"></ion-icon>
+          </div>
+          <div class="module-info">
+            <h3>Reportes</h3>
+            <p>Estadísticas y análisis</p>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="module-arrow"></ion-icon>
+        </div>
+      </ion-card>
+
+      <!-- E-commerce: Tienda Online -->
+      <ion-card class="module-card success hover-lift premium-glow magnetic-premium" button (click)="navigateTo('tienda')">
+        <div class="module-content">
+          <div class="module-icon">
+            <ion-icon name="storefront-outline" class="animated-icon"></ion-icon>
+          </div>
+          <div class="module-info">
+            <h3>🛍️ Tienda Online</h3>
+            <p>Productos para caballos</p>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="module-arrow"></ion-icon>
+        </div>
+      </ion-card>
+
+      <!-- E-commerce: Marketplace -->
+      <ion-card class="module-card warning hover-lift premium-float magnetic-premium" button (click)="navigateTo('marketplace')">
+        <div class="module-content">
+          <div class="module-icon">
+            <ion-icon name="pricetag-outline" class="animated-icon"></ion-icon>
+          </div>
+          <div class="module-info">
+            <h3>🐎 Marketplace</h3>
+            <p>Compra y vende caballos</p>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="module-arrow"></ion-icon>
+        </div>
+      </ion-card>
+    </div>
+
+    <!-- Módulos administrativos -->
+    <div *ngIf="userRole === 'admin'" class="admin-section">
+      <h3 class="admin-title">🔧 Administración</h3>
+      <div class="modules-grid admin-grid">
+        <ion-card class="module-card admin" button (click)="navigateTo('usuarios')">
+          <div class="module-content">
+            <div class="module-icon">
+              <ion-icon name="people-circle-outline"></ion-icon>
+            </div>
+            <div class="module-info">
+              <h3>Usuarios</h3>
+              <p>Gestión de permisos</p>
+            </div>
+            <ion-icon name="chevron-forward-outline" class="module-arrow"></ion-icon>
+          </div>
+        </ion-card>
+
+        <ion-card class="module-card admin" button (click)="navigateTo('montadores')">
+          <div class="module-content">
+            <div class="module-icon">
+              <ion-icon name="people-outline"></ion-icon>
+            </div>
+            <div class="module-info">
+              <h3>Montadores</h3>
+              <p>Herradores y personal</p>
+            </div>
+            <ion-icon name="chevron-forward-outline" class="module-arrow"></ion-icon>
+          </div>
+        </ion-card>
+
+        <ion-card class="module-card admin" button (click)="navigateTo('herrajes')">
+          <div class="module-content">
+            <div class="module-icon">
+              <ion-icon name="hammer-outline"></ion-icon>
+            </div>
+            <div class="module-info">
+              <h3>Herrajes</h3>
+              <p>Inventario de herramientas</p>
+            </div>
+            <ion-icon name="chevron-forward-outline" class="module-arrow"></ion-icon>
+          </div>
+        </ion-card>
+
+        <ion-card class="module-card admin" button (click)="navigateTo('servicios')">
+          <div class="module-content">
+            <div class="module-icon">
+              <ion-icon name="medical-outline"></ion-icon>
+            </div>
+            <div class="module-info">
+              <h3>Servicios</h3>
+              <p>Historial veterinario</p>
+            </div>
+            <ion-icon name="chevron-forward-outline" class="module-arrow"></ion-icon>
+          </div>
+        </ion-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer con información -->
+  <div class="footer-section">
+    <div class="footer-content">
+      <p class="footer-text">
+        <ion-icon name="shield-checkmark-outline"></ion-icon>
+        Sistema seguro con Firebase
+      </p>
+      <p class="footer-version">v1.0.0</p>
+    </div>
+  </div>
+
+  <!-- Botón de logout mejorado -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button color="danger" (click)="logout()">
+      <ion-icon name="log-out-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

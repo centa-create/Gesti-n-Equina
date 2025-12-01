@@ -1,0 +1,49 @@
+<ion-card class="horse-card">
+  <img [src]="getImageUrl()" alt="{{ horse.name }}" class="horse-image">
+  
+  <ion-card-header>
+    <ion-card-title class="horse-name">{{ horse.name }}</ion-card-title>
+    <p class="horse-race">{{ horse.race }}</p>
+  </ion-card-header>
+
+  <ion-card-content>
+    <div class="horse-info">
+      <div class="info-row">
+        <span class="label">Edad:</span>
+        <span class="value">{{ horse.age }} años</span>
+      </div>
+      
+      <div class="info-row">
+        <span class="label">Color:</span>
+        <span class="value">{{ horse.color }}</span>
+      </div>
+
+      <div *ngIf="horse.owner" class="info-row">
+        <span class="label">Propietario:</span>
+        <span class="value">{{ horse.owner }}</span>
+      </div>
+
+      <div *ngIf="horse.healthStatus" class="info-row">
+        <span class="label">Salud:</span>
+        <ion-chip [color]="getHealthStatusColor()" class="health-chip">
+          {{ horse.healthStatus }}
+        </ion-chip>
+      </div>
+    </div>
+
+    <div *ngIf="showActions" class="actions">
+      <ion-button fill="clear" size="small" color="primary" (click)="onViewDetails()">
+        <ion-icon slot="start" [icon]="eyeOutline"></ion-icon>
+        Ver
+      </ion-button>
+      <ion-button fill="clear" size="small" color="warning" (click)="onEdit()">
+        <ion-icon slot="start" [icon]="createOutline"></ion-icon>
+        Editar
+      </ion-button>
+      <ion-button fill="clear" size="small" color="danger" (click)="onDelete()">
+        <ion-icon slot="start" [icon]="trashOutline"></ion-icon>
+        Eliminar
+      </ion-button>
+    </div>
+  </ion-card-content>
+</ion-card>
