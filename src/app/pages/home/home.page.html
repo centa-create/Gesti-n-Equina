@@ -21,8 +21,8 @@
   <!-- Sección de bienvenida -->
   <div class="welcome-section">
     <div class="welcome-content">
-      <ion-icon name="home-outline" class="welcome-icon"></ion-icon>
-      <h1>🏇 Gestión Equina</h1>
+      <img src="assets/icon/logo.png" alt="Gestión Equina Logo" class="dashboard-logo">
+      <h1>Gestión Equina</h1>
       <p>Sistema integral de gestión para criaderos equinos</p>
     </div>
   </div>
@@ -345,6 +345,19 @@
             <div class="module-info">
               <h3>Servicios</h3>
               <p>Historial veterinario</p>
+            </div>
+            <ion-icon name="chevron-forward-outline" class="module-arrow"></ion-icon>
+          </div>
+        </ion-card>
+
+        <ion-card class="module-card admin" button (click)="navigateTo('finanzas')">
+          <div class="module-content">
+            <div class="module-icon">
+              <ion-icon name="cash-outline"></ion-icon>
+            </div>
+            <div class="module-info">
+              <h3>Finanzas</h3>
+              <p>Ingresos, gastos y análisis</p>
             </div>
             <ion-icon name="chevron-forward-outline" class="module-arrow"></ion-icon>
           </div>

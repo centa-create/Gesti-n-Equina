@@ -2,14 +2,17 @@ import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { CriaderoActivoService } from '../../services/criadero-activo.service';
 import { FinanzasService } from '../../services/finanzas.service';
 import { Transaccion, ResumenFinanciero, CategoriaFinanciera } from '../../models/transaccion';
+import { PremiumChartsComponent, ChartConfig } from '../../components/premium-charts/premium-charts.component';
+import { FirestoreDatePipe } from '../../pipes/firestore-date.pipe';
 
 @Component({
   selector: 'app-finanzas',
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule],
+  imports: [IonicModule, CommonModule, FormsModule, PremiumChartsComponent, FirestoreDatePipe],
   templateUrl: './finanzas.page.html',
   styleUrls: ['./finanzas.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -29,9 +32,13 @@ export class FinanzasPage implements OnInit {
   filtroTipo: 'todos' | 'ingreso' | 'gasto' = 'todos';
   filtroCategoria = '';
 
+  // Configuración del gráfico mensual
+  chartConfig: ChartConfig | null = null;
+
   constructor(
     private criaderoService: CriaderoActivoService,
-    private finanzasService: FinanzasService
+    private finanzasService: FinanzasService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -66,6 +73,7 @@ export class FinanzasPage implements OnInit {
     this.finanzasService.getResumenFinanciero(this.criaderoActivo.id).subscribe({
       next: (resumen) => {
         this.resumen = resumen;
+        this.generarGraficoMensual();
       },
       error: (err) => {
         console.error('Error cargando resumen:', err);
@@ -112,6 +120,7 @@ export class FinanzasPage implements OnInit {
         };
         this.showForm = false;
         this.isLoading = false;
+        this.generarGraficoMensual();
       },
       error: (err) => {
         console.error('Error creando transacción:', err);
@@ -127,6 +136,7 @@ export class FinanzasPage implements OnInit {
         next: () => {
           this.cargarDatos();
           this.isLoading = false;
+          this.generarGraficoMensual();
         },
         error: (err) => {
           console.error('Error eliminando transacción:', err);
@@ -154,6 +164,90 @@ export class FinanzasPage implements OnInit {
       style: 'currency',
       currency: 'COP'
     }).format(monto);
+  }
+
+  // Generar gráfico mensual de ingresos vs gastos
+  generarGraficoMensual() {
+    if (!this.transacciones || this.transacciones.length === 0) {
+      this.chartConfig = null;
+      return;
+    }
+
+    // Agrupar transacciones por mes
+    const datosPorMes = new Map<string, { ingresos: number; gastos: number }>();
+
+    this.transacciones.forEach(transaccion => {
+      const fecha = new Date(transaccion.fecha);
+      const mesKey = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
+      const mesNombre = fecha.toLocaleDateString('es-ES', { year: 'numeric', month: 'short' });
+
+      if (!datosPorMes.has(mesKey)) {
+        datosPorMes.set(mesKey, { ingresos: 0, gastos: 0 });
+      }
+
+      const datosMes = datosPorMes.get(mesKey)!;
+      if (transaccion.tipo === 'ingreso') {
+        datosMes.ingresos += transaccion.monto;
+      } else {
+        datosMes.gastos += transaccion.monto;
+      }
+    });
+
+    // Ordenar por fecha
+    const entradasOrdenadas = Array.from(datosPorMes.entries())
+      .sort(([a], [b]) => a.localeCompare(b));
+
+    const labels = entradasOrdenadas.map(([mesKey]) => {
+      const [year, month] = mesKey.split('-');
+      return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'short'
+      });
+    });
+
+    const ingresosData = entradasOrdenadas.map(([, datos]) => datos.ingresos);
+    const gastosData = entradasOrdenadas.map(([, datos]) => datos.gastos);
+
+    this.chartConfig = {
+      type: 'line',
+      title: 'Tendencia Mensual de Finanzas',
+      subtitle: 'Ingresos vs Gastos',
+      labels: labels,
+      data: [],
+      datasets: [
+        {
+          label: 'Ingresos',
+          data: ingresosData,
+          backgroundColor: 'rgba(34, 197, 94, 0.1)',
+          borderColor: '#22c55e',
+          borderWidth: 3,
+          fill: false,
+          tension: 0.4,
+          pointRadius: 6,
+          pointHoverRadius: 8
+        },
+        {
+          label: 'Gastos',
+          data: gastosData,
+          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          borderColor: '#ef4444',
+          borderWidth: 3,
+          fill: false,
+          tension: 0.4,
+          pointRadius: 6,
+          pointHoverRadius: 8
+        }
+      ],
+      height: 350,
+      showLegend: true,
+      showGrid: true,
+      animationDuration: 1500,
+      theme: 'financial'
+    };
+  }
+
+  irACriaderos() {
+    this.router.navigate(['/criaderos']);
   }
 
   // Métodos legacy para compatibilidad

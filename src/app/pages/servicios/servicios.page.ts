@@ -5,13 +5,14 @@ import { IonicModule } from '@ionic/angular';
 import { FirebaseService } from '../../services/firebase.service';
 import { AuthService } from '../../services/auth.service';
 import { AdvancedFiltersComponent, FilterConfig, FilterValues } from '../../components/advanced-filters/advanced-filters.component';
+import { FirestoreDatePipe } from '../../pipes/firestore-date.pipe';
 
 @Component({
   selector: 'app-servicios',
   templateUrl: './servicios.page.html',
   styleUrls: ['./servicios.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, FormsModule, AdvancedFiltersComponent],
+  imports: [CommonModule, IonicModule, FormsModule, AdvancedFiltersComponent, FirestoreDatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServiciosPage implements OnInit {

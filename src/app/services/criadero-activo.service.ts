@@ -22,4 +22,8 @@ export class CriaderoActivoService {
     localStorage.removeItem('criaderoActivo');
     this._criaderoActivo.next(null);
   }
+
+  getCriaderoActivo(): any {
+    return this._criaderoActivo.value;
+  }
 }

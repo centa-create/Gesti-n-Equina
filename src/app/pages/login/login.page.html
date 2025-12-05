@@ -1,64 +1,113 @@
-<ion-content class="login-background">
+<ion-content class="login-page">
+  <!-- Main Container - Perfectly Centered -->
   <div class="login-container">
-    <div class="logo-section">
-      <div class="horse-icon">🐎</div>
+    <!-- Branding Section -->
+    <div class="branding-section">
+      <div class="logo-container">
+        <img src="assets/icon/logo.png" alt="Gestión Equina Logo" class="app-logo">
+      </div>
       <h1 class="app-title">Gestión Equina</h1>
       <p class="app-subtitle">Sistema de gestión para criaderos equinos</p>
     </div>
 
-    <ion-card class="login-card">
-      <ion-card-header>
-        <ion-card-title class="login-title">Iniciar Sesión</ion-card-title>
-      </ion-card-header>
+    <!-- Login Card -->
+    <div class="login-card-container">
+      <ion-card class="login-card">
+        <ion-card-header class="login-header">
+          <ion-card-title class="login-title">
+            <ion-icon name="log-in-outline" class="title-icon"></ion-icon>
+            Iniciar Sesión
+          </ion-card-title>
+          <ion-card-subtitle class="login-subtitle">
+            Ingresa tus credenciales para continuar
+          </ion-card-subtitle>
+        </ion-card-header>
 
-      <ion-card-content>
-        <form (ngSubmit)="onLogin()">
-          <ion-item class="login-item">
-            <ion-label position="floating" color="primary">Email</ion-label>
-            <ion-input
-              type="email"
-              [(ngModel)]="email"
-              name="email"
-              required
-              clearInput="true">
-            </ion-input>
-          </ion-item>
+        <ion-card-content class="login-content">
+          <form (ngSubmit)="onLogin()" class="login-form">
+            <!-- Email Input -->
+            <div class="input-group">
+              <ion-item class="login-item" lines="none">
+                <ion-input
+                  label="Correo Electrónico"
+                  labelPlacement="floating"
+                  [(ngModel)]="email"
+                  name="email"
+                  type="email"
+                  required
+                  placeholder="tu@email.com"
+                  class="login-input">
+                  <ion-icon name="mail-outline" slot="start" color="primary"></ion-icon>
+                </ion-input>
+              </ion-item>
+            </div>
 
-          <ion-item class="login-item">
-            <ion-label position="floating" color="primary">Contraseña</ion-label>
-            <ion-input
-              type="password"
-              [(ngModel)]="password"
-              name="password"
-              required
-              clearInput="true">
-            </ion-input>
-          </ion-item>
+            <!-- Password Input -->
+            <div class="input-group">
+              <ion-item class="login-item" lines="none">
+                <ion-input
+                  label="Contraseña"
+                  labelPlacement="floating"
+                  [(ngModel)]="password"
+                  name="password"
+                  type="password"
+                  required
+                  placeholder="Tu contraseña"
+                  class="login-input">
+                  <ion-icon name="lock-closed-outline" slot="start" color="primary"></ion-icon>
+                </ion-input>
+              </ion-item>
+            </div>
 
-          <ion-button
-            expand="block"
-            type="submit"
-            class="login-button"
-            [disabled]="!email || !password">
-            <ion-icon name="log-in" slot="start"></ion-icon>
-            Entrar
-          </ion-button>
-        </form>
+            <!-- Login Button -->
+            <div class="button-group">
+              <ion-button
+                type="submit"
+                expand="block"
+                color="primary"
+                [disabled]="!email || !password"
+                class="login-button">
+                <ion-icon name="log-in" slot="start"></ion-icon>
+                Iniciar Sesión
+              </ion-button>
+            </div>
 
-        <ion-button
-          expand="block"
-          fill="outline"
-          color="primary"
-          routerLink="/registro"
-          class="register-button">
-          <ion-icon name="person-add" slot="start"></ion-icon>
-          Crear Cuenta
-        </ion-button>
-      </ion-card-content>
-    </ion-card>
+            <!-- Register Link -->
+            <div class="register-section">
+              <span class="register-text">¿No tienes cuenta?</span>
+              <ion-button
+                fill="clear"
+                color="secondary"
+                routerLink="/registro"
+                class="register-link">
+                Regístrate aquí
+              </ion-button>
+            </div>
 
-    <div class="footer-text">
-      <p>© 2025 Gestión Equina - Todos los derechos reservados</p>
+            <!-- Forgot Password -->
+            <div class="forgot-section">
+              <ion-button
+                fill="clear"
+                color="medium"
+                size="small"
+                routerLink="/recuperar-password"
+                class="forgot-link">
+                <ion-icon name="key-outline" slot="start"></ion-icon>
+                ¿Olvidaste tu contraseña?
+              </ion-button>
+            </div>
+          </form>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Footer -->
+    <div class="login-footer">
+      <p class="footer-text">
+        <ion-icon name="shield-checkmark-outline" color="primary"></ion-icon>
+        Plataforma segura y confiable
+      </p>
+      <p class="copyright">© 2025 Gestión Equina</p>
     </div>
   </div>
 </ion-content>

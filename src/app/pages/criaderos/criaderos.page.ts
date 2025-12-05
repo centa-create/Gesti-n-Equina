@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
@@ -81,12 +81,21 @@ export class CriaderosPage implements OnInit {
   constructor(
     private firebaseService: FirebaseService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   async ngOnInit() {
-    this.userRole = this.authService.getRole();
-    this.canEdit = this.userRole === 'admin';
+    // Suscribirse a cambios en el usuario para actualizar permisos
+    this.authService.currentUser$.subscribe(user => {
+      this.userRole = user?.role || null;
+      this.canEdit = this.userRole === 'admin';
+      console.log('Usuario actual:', user);
+      console.log('Rol del usuario:', this.userRole);
+      console.log('Puede editar:', this.canEdit);
+      this.cdr.detectChanges();
+    });
+
     await this.cargarCriaderos();
   }
 
@@ -94,6 +103,7 @@ export class CriaderosPage implements OnInit {
     try {
       this.criaderos = await this.firebaseService.getCriaderos();
       this.aplicarFiltros();
+      this.cdr.detectChanges();
     } catch (error) {
       console.error('Error cargando criaderos:', error);
     }
@@ -157,6 +167,7 @@ export class CriaderosPage implements OnInit {
   onFiltrosChange(values: FilterValues) {
     this.filtrosValues = values;
     this.aplicarFiltros();
+    this.cdr.detectChanges();
   }
 
   onFiltrosToggle(expanded: boolean | any) {

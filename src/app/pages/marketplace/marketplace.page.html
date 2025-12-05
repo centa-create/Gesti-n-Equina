@@ -1,3 +1,18 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Marketplace</ion-title>
+    <ion-buttons slot="end" *ngIf="userRole === 'admin'">
+      <ion-button (click)="publicarAnuncio()">
+        <ion-icon name="add"></ion-icon>
+        Vender
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
 <ion-content [fullscreen]="true" class="marketplace-content app-background-premium">
   <!-- Partículas flotantes -->
   <div class="particles-premium"></div>

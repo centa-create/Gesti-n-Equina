@@ -1,32 +1,279 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-title>Gestión de Usuarios</ion-title>
+  <ion-toolbar class="professional-header">
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="professional-title">
+      <ion-icon name="people" class="title-icon"></ion-icon>
+      Gestión de Usuarios
+    </ion-title>
+    <ion-buttons slot="end" *ngIf="canEdit">
+      <ion-button fill="solid" color="primary" (click)="toggleForm()" class="action-button">
+        <ion-icon name="person-add" slot="start"></ion-icon>
+        Nuevo Usuario
+      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <h2>Usuarios del Sistema</h2>
+<ion-content class="professional-page users-theme">
+  <!-- Dashboard de Estadísticas -->
+  <div class="professional-dashboard" *ngIf="!loading && usuarios.length > 0">
+    <h2 class="dashboard-title">👥 Panel de Usuarios</h2>
+    <div class="stats-grid">
+      <ion-card class="stat-card total premium-glow">
+        <ion-card-content>
+          <div class="stat-header">
+            <ion-icon name="people" color="primary"></ion-icon>
+            <span class="stat-label">Total Usuarios</span>
+          </div>
+          <div class="stat-value">{{ usuarios.length }}</div>
+          <div class="stat-subtitle">registrados en el sistema</div>
+        </ion-card-content>
+      </ion-card>
 
-  <ion-list *ngIf="!loading">
-    <ion-item *ngFor="let usuario of usuarios">
-      <ion-label>
-        <h3>{{ usuario.nombre }} {{ usuario.apellido }}</h3>
-        <p>Rol actual: {{ usuario.rol }}</p>
-      </ion-label>
-      <ion-select
-        *ngIf="canEdit"
-        slot="end"
-        [value]="usuario.rol"
-        (ionChange)="cambiarRol(usuario, $event.detail.value)">
-        <ion-select-option value="admin">Admin</ion-select-option>
-        <ion-select-option value="empleado">Empleado</ion-select-option>
-        <ion-select-option value="visitante">Visitante</ion-select-option>
-      </ion-select>
-    </ion-item>
-  </ion-list>
+      <ion-card class="stat-card admin premium-float">
+        <ion-card-content>
+          <div class="stat-header">
+            <ion-icon name="shield-checkmark" color="danger"></ion-icon>
+            <span class="stat-label">Administradores</span>
+          </div>
+          <div class="stat-value">{{ getRoleCount('admin') }}</div>
+          <div class="stat-subtitle">acceso completo</div>
+        </ion-card-content>
+      </ion-card>
 
-  <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
+      <ion-card class="stat-card employee premium-morph">
+        <ion-card-content>
+          <div class="stat-header">
+            <ion-icon name="briefcase" color="secondary"></ion-icon>
+            <span class="stat-label">Empleados</span>
+          </div>
+          <div class="stat-value">{{ getRoleCount('empleado') }}</div>
+          <div class="stat-subtitle">acceso limitado</div>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="stat-card visitor premium-shimmer">
+        <ion-card-content>
+          <div class="stat-header">
+            <ion-icon name="eye" color="tertiary"></ion-icon>
+            <span class="stat-label">Visitantes</span>
+          </div>
+          <div class="stat-value">{{ getRoleCount('visitante') }}</div>
+          <div class="stat-subtitle">solo lectura</div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+
+  <!-- Galería de Usuarios -->
+  <div class="professional-content-section">
+    <h2 class="content-title" *ngIf="!loading && usuarios.length > 0">👤 Usuarios Registrados</h2>
+
+    <div class="content-grid" *ngIf="!loading && usuarios.length > 0">
+      <ion-card class="content-card premium-glow" *ngFor="let usuario of usuarios">
+        <ion-card-header class="card-header">
+          <div class="card-avatar" [style.background]="getRoleColor(usuario.rol)">
+            <ion-icon [name]="getRoleIcon(usuario.rol)" color="light"></ion-icon>
+          </div>
+          <div class="card-info">
+            <ion-card-title class="card-title">{{ usuario.nombre }} {{ usuario.apellido }}</ion-card-title>
+            <ion-card-subtitle class="card-subtitle">{{ usuario.email }}</ion-card-subtitle>
+          </div>
+          <div class="card-status">
+            <span class="status-badge" [class]="'status-' + usuario.rol">
+              {{ usuario.rol | titlecase }}
+            </span>
+          </div>
+        </ion-card-header>
+
+        <ion-card-content class="card-content">
+          <div class="detail-grid">
+            <div class="detail-item">
+              <ion-icon name="mail-outline" color="medium"></ion-icon>
+              <span>{{ usuario.email }}</span>
+            </div>
+            <div class="detail-item">
+              <ion-icon name="call-outline" color="medium"></ion-icon>
+              <span>{{ usuario.telefono || 'No especificado' }}</span>
+            </div>
+            <div class="detail-item">
+              <ion-icon name="calendar-outline" color="medium"></ion-icon>
+              <span>{{ usuario.createdAt ? (usuario.createdAt.toDate() | date:'dd/MM/yyyy') : 'Fecha desconocida' }}</span>
+            </div>
+          </div>
+
+          <div class="card-actions" *ngIf="canEdit">
+            <ion-button fill="clear" color="primary" size="small" (click)="editarUsuario(usuario)">
+              <ion-icon name="create" slot="start"></ion-icon>
+              Editar
+            </ion-button>
+            <ion-button fill="clear" color="danger" size="small" (click)="eliminarUsuario(usuario)" *ngIf="canDeleteUser(usuario)">
+              <ion-icon name="trash" slot="start"></ion-icon>
+              Eliminar
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="loading">
+      <ion-card class="loading-card premium-float">
+        <ion-card-content class="loading-content">
+          <ion-spinner name="crescent" color="primary"></ion-spinner>
+          <h3>Cargando usuarios...</h3>
+          <p>Obteniendo información de usuarios del sistema</p>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Estado Vacío Profesional -->
+    <div class="professional-empty-state" *ngIf="!loading && usuarios.length === 0">
+      <ion-card class="professional-empty-card premium-float">
+        <ion-card-content class="empty-content">
+          <div class="empty-icon">
+            <ion-icon name="people-outline" size="large" color="medium"></ion-icon>
+          </div>
+          <h2 class="empty-title">No hay usuarios registrados</h2>
+          <p class="empty-description">
+            Los usuarios se registran automáticamente cuando acceden al sistema por primera vez
+          </p>
+          <ion-button
+            *ngIf="canEdit"
+            (click)="refreshUsuarios()"
+            color="primary"
+            class="empty-action-button premium-glow">
+            <ion-icon name="refresh" slot="start"></ion-icon>
+            Actualizar Lista
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+
+  <!-- Formulario Profesional para agregar/editar usuario -->
+  <div class="professional-form-section" *ngIf="showForm && canEdit">
+    <ion-card class="professional-form-card premium-glow">
+      <ion-card-header class="form-header">
+        <ion-card-title class="form-title">
+          <ion-icon [name]="nuevoUsuario.id ? 'create' : 'person-add'" class="form-icon"></ion-icon>
+          {{ nuevoUsuario.id ? 'Editar' : 'Registrar Nuevo' }} Usuario
+        </ion-card-title>
+        <ion-card-subtitle class="form-subtitle">
+          Complete la información del usuario del sistema
+        </ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content class="form-content">
+        <form (ngSubmit)="guardarUsuario()" class="professional-form">
+          <div class="form-grid">
+            <!-- Información Personal -->
+            <div class="form-section">
+              <h4 class="section-label">👤 Información Personal</h4>
+              <ion-item class="form-item">
+                <ion-input
+                  label="Nombre"
+                  labelPlacement="floating"
+                  [(ngModel)]="nuevoUsuario.nombre"
+                  name="nombre"
+                  required
+                  placeholder="Nombre del usuario"
+                  class="premium-input">
+                </ion-input>
+              </ion-item>
+
+              <ion-item class="form-item">
+                <ion-input
+                  label="Apellido"
+                  labelPlacement="floating"
+                  [(ngModel)]="nuevoUsuario.apellido"
+                  name="apellido"
+                  placeholder="Apellido del usuario"
+                  class="premium-input">
+                </ion-input>
+              </ion-item>
+
+              <ion-item class="form-item">
+                <ion-input
+                  label="Email"
+                  labelPlacement="floating"
+                  [(ngModel)]="nuevoUsuario.email"
+                  name="email"
+                  type="email"
+                  required
+                  placeholder="usuario@email.com"
+                  class="premium-input">
+                </ion-input>
+              </ion-item>
+
+              <ion-item class="form-item">
+                <ion-input
+                  label="Teléfono"
+                  labelPlacement="floating"
+                  [(ngModel)]="nuevoUsuario.telefono"
+                  name="telefono"
+                  type="tel"
+                  placeholder="+57 300 123 4567"
+                  class="premium-input">
+                </ion-input>
+              </ion-item>
+            </div>
+
+            <!-- Configuración de Rol -->
+            <div class="form-section">
+              <h4 class="section-label">🔐 Configuración de Acceso</h4>
+              <ion-item class="form-item">
+                <ion-select
+                  label="Rol del Usuario"
+                  labelPlacement="floating"
+                  [(ngModel)]="nuevoUsuario.rol"
+                  name="rol"
+                  required
+                  placeholder="Seleccionar rol"
+                  class="premium-input">
+                  <ion-select-option value="admin">
+                    <ion-icon name="shield-checkmark" slot="start" color="danger"></ion-icon>
+                    Administrador - Acceso completo
+                  </ion-select-option>
+                  <ion-select-option value="empleado">
+                    <ion-icon name="briefcase" slot="start" color="secondary"></ion-icon>
+                    Empleado - Acceso limitado
+                  </ion-select-option>
+                  <ion-select-option value="visitante">
+                    <ion-icon name="eye" slot="start" color="tertiary"></ion-icon>
+                    Visitante - Solo lectura
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+            </div>
+          </div>
+
+          <!-- Botones de Acción -->
+          <div class="form-actions">
+            <ion-button
+              type="submit"
+              expand="block"
+              color="primary"
+              [disabled]="!nuevoUsuario.nombre || !nuevoUsuario.email || !nuevoUsuario.rol"
+              class="submit-button premium-glow">
+              <ion-icon [name]="nuevoUsuario.id ? 'checkmark' : 'person-add'" slot="start"></ion-icon>
+              {{ nuevoUsuario.id ? 'Actualizar' : 'Registrar' }} Usuario
+            </ion-button>
+
+            <ion-button
+              fill="outline"
+              expand="block"
+              color="medium"
+              (click)="toggleForm()"
+              class="cancel-button">
+              <ion-icon name="close" slot="start"></ion-icon>
+              Cancelar
+            </ion-button>
+          </div>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  </div>
 </ion-content>

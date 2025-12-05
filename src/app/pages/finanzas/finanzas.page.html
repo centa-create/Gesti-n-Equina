@@ -16,6 +16,19 @@
   <!-- Loading Spinner -->
   <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
 
+  <!-- Mensaje cuando no hay criadero seleccionado -->
+  <ion-card *ngIf="!isLoading && !criaderoActivo">
+    <ion-card-content class="ion-text-center">
+      <ion-icon name="business-outline" size="large" color="medium"></ion-icon>
+      <h3>No hay criadero seleccionado</h3>
+      <p>Para gestionar las finanzas, primero debes seleccionar un criadero activo.</p>
+      <ion-button (click)="irACriaderos()">
+        <ion-icon name="business" slot="start"></ion-icon>
+        Ir a Criaderos
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
   <!-- Resumen Financiero -->
   <div *ngIf="resumen && !isLoading">
     <ion-card>
@@ -51,6 +64,18 @@
     </ion-card>
   </div>
 
+  <!-- Gráfico Mensual -->
+  <div *ngIf="chartConfig && !isLoading">
+    <ion-card>
+      <ion-card-content>
+        <app-premium-charts
+          [config]="chartConfig"
+          [loading]="false">
+        </app-premium-charts>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
   <!-- Filtros -->
   <ion-card *ngIf="!isLoading">
     <ion-card-content>
@@ -80,7 +105,7 @@
       <ion-label>
         <h2>{{ transaccion.descripcion }}</h2>
         <p>{{ getCategoriaNombre(transaccion.categoria) }}</p>
-        <p>{{ transaccion.fecha | date:'short' }}</p>
+        <p>{{ transaccion.fecha | firestoreDate:'short' }}</p>
         <p *ngIf="transaccion.proveedor">Proveedor: {{ transaccion.proveedor }}</p>
       </ion-label>
       <ion-chip slot="end" [color]="getTipoColor(transaccion.tipo)">

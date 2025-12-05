@@ -3,23 +3,437 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home"></ion-back-button>
     </ion-buttons>
-    <ion-title>Reportes de {{ criaderoActivo?.nombre }}</ion-title>
+    <ion-title>Reportes y Análisis</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="crearReporte()" color="secondary" fill="outline">
+        <ion-icon name="add" slot="start"></ion-icon>
+        Crear Reporte
+      </ion-button>
+      <ion-button (click)="exportarPDF()" color="primary">
+        <ion-icon name="download" slot="start"></ion-icon>
+        Exportar PDF
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <ion-card *ngIf="reporte">
-    <ion-card-header>
-      <ion-card-title>Resumen</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <p>Total de caballos: {{ reporte.totalCaballos }}</p>
-      <canvas baseChart
-        [datasets]="barChartData"
-        [labels]="barChartLabels"
-        [options]="barChartOptions"
-        [type]="barChartType">
-      </canvas>
+<ion-content class="reportes-content">
+  <!-- Loading Spinner -->
+  <div class="loading-container" *ngIf="isLoading">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Generando reportes...</p>
+  </div>
+
+  <!-- Mensaje cuando no hay criadero seleccionado -->
+  <ion-card class="empty-state-card" *ngIf="!isLoading && !criaderoActivo">
+    <ion-card-content class="ion-text-center">
+      <div class="empty-state-icon">
+        <ion-icon name="business-outline"></ion-icon>
+      </div>
+      <h3>No hay criadero seleccionado</h3>
+      <p>Para ver reportes, primero debes seleccionar un criadero activo.</p>
+      <ion-button routerLink="/criaderos" fill="outline">
+        <ion-icon name="business" slot="start"></ion-icon>
+        Ir a Criaderos
+      </ion-button>
     </ion-card-content>
   </ion-card>
+
+  <!-- Contenido Principal de Reportes -->
+  <div *ngIf="!isLoading && criaderoActivo" class="reportes-main">
+    <!-- Header con información del criadero -->
+    <div class="reportes-header">
+      <div class="criadero-info">
+        <ion-icon name="business" color="primary"></ion-icon>
+        <div>
+          <h2>{{ criaderoActivo.nombre }}</h2>
+          <p class="criadero-meta">
+            <span>Reporte generado: {{ fechaActual | date:'dd/MM/yyyy HH:mm' }}</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estadísticas Disponibles -->
+    <div class="estadisticas-disponibles">
+      <h3 class="seccion-titulo">
+        <ion-icon name="bar-chart" color="primary"></ion-icon>
+        Estadísticas Disponibles
+      </h3>
+
+      <div class="estadisticas-grid">
+        <!-- Caballos -->
+        <ion-card class="estadistica-card caballos" (click)="verDetalleEstadistica('caballos')">
+          <ion-card-content>
+            <div class="estadistica-header">
+              <div class="estadistica-icon">
+                <ion-icon name="paw"></ion-icon>
+              </div>
+              <div class="estadistica-info">
+                <h3>Caballos</h3>
+                <p class="estadistica-desc">Estadísticas de equinos</p>
+              </div>
+            </div>
+            <div class="estadistica-metrics">
+              <div class="metric">
+                <span class="metric-value">{{ reporte?.totalCaballos || 0 }}</span>
+                <span class="metric-label">Total</span>
+              </div>
+              <div class="metric">
+                <span class="metric-value">{{ reporte?.caballosActivos || 0 }}</span>
+                <span class="metric-label">Activos</span>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Finanzas -->
+        <ion-card class="estadistica-card finanzas" (click)="verDetalleEstadistica('finanzas')">
+          <ion-card-content>
+            <div class="estadistica-header">
+              <div class="estadistica-icon">
+                <ion-icon name="cash"></ion-icon>
+              </div>
+              <div class="estadistica-info">
+                <h3>Finanzas</h3>
+                <p class="estadistica-desc">Ingresos y egresos</p>
+              </div>
+            </div>
+            <div class="estadistica-metrics">
+              <div class="metric">
+                <span class="metric-value success">${{ (reporte?.ingresos || 0) | number:'1.0-0' }}</span>
+                <span class="metric-label">Ingresos</span>
+              </div>
+              <div class="metric">
+                <span class="metric-value danger">${{ (reporte?.egresos || 0) | number:'1.0-0' }}</span>
+                <span class="metric-label">Egresos</span>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Servicios Veterinarios -->
+        <ion-card class="estadistica-card servicios" (click)="verDetalleEstadistica('servicios')">
+          <ion-card-content>
+            <div class="estadistica-header">
+              <div class="estadistica-icon">
+                <ion-icon name="medkit"></ion-icon>
+              </div>
+              <div class="estadistica-info">
+                <h3>Servicios Veterinarios</h3>
+                <p class="estadistica-desc">Atenciones y tratamientos</p>
+              </div>
+            </div>
+            <div class="estadistica-metrics">
+              <div class="metric">
+                <span class="metric-value">{{ reporte?.serviciosCount || 0 }}</span>
+                <span class="metric-label">Servicios</span>
+              </div>
+              <div class="metric">
+                <span class="metric-value">{{ reporte?.serviciosRecientes || 0 }}</span>
+                <span class="metric-label">Este mes</span>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Inventario -->
+        <ion-card class="estadistica-card inventario" (click)="verDetalleEstadistica('inventario')">
+          <ion-card-content>
+            <div class="estadistica-header">
+              <div class="estadistica-icon">
+                <ion-icon name="cube"></ion-icon>
+              </div>
+              <div class="estadistica-info">
+                <h3>Inventario</h3>
+                <p class="estadistica-desc">Productos y suministros</p>
+              </div>
+            </div>
+            <div class="estadistica-metrics">
+              <div class="metric">
+                <span class="metric-value">{{ reporte?.inventarioCount || 0 }}</span>
+                <span class="metric-label">Productos</span>
+              </div>
+              <div class="metric">
+                <span class="metric-value warning">{{ reporte?.productosBajoStock || 0 }}</span>
+                <span class="metric-label">Bajo stock</span>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </div>
+
+    <!-- Resumen Ejecutivo -->
+    <ion-card class="resumen-ejecutivo">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="analytics" slot="start"></ion-icon>
+          Resumen Ejecutivo
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="resumen-grid">
+          <div class="resumen-item">
+            <div class="resumen-icon">
+              <ion-icon name="trending-up" color="success"></ion-icon>
+            </div>
+            <div class="resumen-content">
+              <h4>Balance General</h4>
+              <p class="resumen-value" [class]="(reporte?.balance || 0) >= 0 ? 'success' : 'danger'">
+                ${{ (reporte?.balance || 0) | number:'1.0-0' }}
+              </p>
+            </div>
+          </div>
+
+          <div class="resumen-item">
+            <div class="resumen-icon">
+              <ion-icon name="calendar" color="primary"></ion-icon>
+            </div>
+            <div class="resumen-content">
+              <h4>Eventos Próximos</h4>
+              <p class="resumen-value">{{ reporte?.eventosProximos || 0 }}</p>
+            </div>
+          </div>
+
+          <div class="resumen-item">
+            <div class="resumen-icon">
+              <ion-icon name="people" color="tertiary"></ion-icon>
+            </div>
+            <div class="resumen-content">
+              <h4>Clientes Activos</h4>
+              <p class="resumen-value">{{ reporte?.clientesCount || 0 }}</p>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Gráfico Principal -->
+    <ion-card class="grafico-principal" *ngIf="reporte && (reporte.ingresos > 0 || reporte.egresos > 0)">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="bar-chart" slot="start"></ion-icon>
+          Análisis Financiero Mensual
+        </ion-card-title>
+        <ion-card-subtitle>Últimos 6 meses</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="chart-container">
+          <canvas baseChart
+            [datasets]="barChartData"
+            [labels]="barChartLabels"
+            [options]="barChartOptions"
+            [type]="barChartType">
+          </canvas>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Filtros de Fecha para Exportación -->
+    <ion-card class="export-filters">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="filter" slot="start"></ion-icon>
+          Filtros de Exportación
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-label>Fecha Inicio</ion-label>
+          <ion-datetime
+            [(ngModel)]="fechaInicioExport"
+            presentation="date"
+            [max]="fechaActual">
+          </ion-datetime>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>Fecha Fin</ion-label>
+          <ion-datetime
+            [(ngModel)]="fechaFinExport"
+            presentation="date"
+            [max]="fechaActual">
+          </ion-datetime>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>Tipo de Reporte</ion-label>
+          <ion-select [(ngModel)]="tipoReporteExport" placeholder="Seleccionar tipo">
+            <ion-select-option value="completo">Reporte Completo</ion-select-option>
+            <ion-select-option value="financiero">Solo Financiero</ion-select-option>
+            <ion-select-option value="caballos">Solo Caballos</ion-select-option>
+            <ion-select-option value="servicios">Solo Servicios</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <div class="export-actions">
+          <ion-button (click)="exportarPDF()" expand="full" color="primary">
+            <ion-icon name="download" slot="start"></ion-icon>
+            Exportar PDF
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Mensaje cuando no hay datos -->
+  <ion-card class="empty-state-card" *ngIf="!isLoading && criaderoActivo && (!reporte || (reporte.totalCaballos === 0 && reporte.ingresos === 0 && reporte.egresos === 0))">
+    <ion-card-content class="ion-text-center">
+      <div class="empty-state-icon">
+        <ion-icon name="bar-chart-outline"></ion-icon>
+      </div>
+      <h3>No hay datos para mostrar</h3>
+      <p>Registra caballos, transacciones financieras y servicios para ver los reportes completos.</p>
+      <div class="empty-actions">
+        <ion-button routerLink="/caballos" fill="outline">
+          <ion-icon name="paw" slot="start"></ion-icon>
+          Agregar Caballos
+        </ion-button>
+        <ion-button routerLink="/finanzas" fill="outline">
+          <ion-icon name="cash" slot="start"></ion-icon>
+          Registrar Finanzas
+        </ion-button>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Modal para Crear Reporte Personalizado -->
+  <ion-modal [isOpen]="showCrearReporteModal" (willDismiss)="cerrarModalCrearReporte()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Crear Reporte Personalizado</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="cerrarModalCrearReporte()">
+              <ion-icon name="close"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="modal-content">
+        <form (ngSubmit)="generarReportePersonalizado()">
+          <ion-list>
+            <ion-item>
+              <ion-input
+                label="Nombre del Reporte"
+                [(ngModel)]="nuevoReporte.nombre"
+                name="nombre"
+                placeholder="Ej: Reporte Mensual Caballos"
+                required>
+              </ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-textarea
+                label="Descripción"
+                [(ngModel)]="nuevoReporte.descripcion"
+                name="descripcion"
+                placeholder="Describe el propósito de este reporte"
+                rows="3">
+              </ion-textarea>
+            </ion-item>
+
+            <ion-item>
+              <ion-label>Período del Reporte</ion-label>
+              <ion-select [(ngModel)]="nuevoReporte.periodo" name="periodo" placeholder="Seleccionar período">
+                <ion-select-option value="diario">Diario</ion-select-option>
+                <ion-select-option value="semanal">Semanal</ion-select-option>
+                <ion-select-option value="mensual">Mensual</ion-select-option>
+                <ion-select-option value="trimestral">Trimestral</ion-select-option>
+                <ion-select-option value="anual">Anual</ion-select-option>
+                <ion-select-option value="personalizado">Personalizado</ion-select-option>
+              </ion-select>
+            </ion-item>
+
+            <ion-item *ngIf="nuevoReporte.periodo === 'personalizado'">
+              <ion-datetime
+                label="Fecha Inicio"
+                [(ngModel)]="nuevoReporte.fechaInicio"
+                name="fechaInicio"
+                presentation="date"
+                [max]="fechaActual">
+              </ion-datetime>
+            </ion-item>
+
+            <ion-item *ngIf="nuevoReporte.periodo === 'personalizado'">
+              <ion-datetime
+                label="Fecha Fin"
+                [(ngModel)]="nuevoReporte.fechaFin"
+                name="fechaFin"
+                presentation="date"
+                [max]="fechaActual">
+              </ion-datetime>
+            </ion-item>
+
+            <ion-item>
+              <ion-label>Módulos a Incluir</ion-label>
+            </ion-item>
+
+            <ion-item>
+              <ion-checkbox [(ngModel)]="nuevoReporte.incluirCaballos" name="incluirCaballos" slot="start"></ion-checkbox>
+              <ion-label>
+                <h3>Caballos</h3>
+                <p>Estadísticas de equinos y razas</p>
+              </ion-label>
+            </ion-item>
+
+            <ion-item>
+              <ion-checkbox [(ngModel)]="nuevoReporte.incluirFinanzas" name="incluirFinanzas" slot="start"></ion-checkbox>
+              <ion-label>
+                <h3>Finanzas</h3>
+                <p>Ingresos, egresos y balance</p>
+              </ion-label>
+            </ion-item>
+
+            <ion-item>
+              <ion-checkbox [(ngModel)]="nuevoReporte.incluirServicios" name="incluirServicios" slot="start"></ion-checkbox>
+              <ion-label>
+                <h3>Servicios Veterinarios</h3>
+                <p>Atenciones y tratamientos realizados</p>
+              </ion-label>
+            </ion-item>
+
+            <ion-item>
+              <ion-checkbox [(ngModel)]="nuevoReporte.incluirInventario" name="incluirInventario" slot="start"></ion-checkbox>
+              <ion-label>
+                <h3>Inventario</h3>
+                <p>Productos, stock y suministros</p>
+              </ion-label>
+            </ion-item>
+
+            <ion-item>
+              <ion-label>Formato de Salida</ion-label>
+              <ion-select [(ngModel)]="nuevoReporte.formato" name="formato" placeholder="Seleccionar formato">
+                <ion-select-option value="pdf">PDF</ion-select-option>
+                <ion-select-option value="excel">Excel</ion-select-option>
+                <ion-select-option value="csv">CSV</ion-select-option>
+              </ion-select>
+            </ion-item>
+
+            <ion-item>
+              <ion-label>Frecuencia de Generación</ion-label>
+              <ion-select [(ngModel)]="nuevoReporte.frecuencia" name="frecuencia" placeholder="Seleccionar frecuencia">
+                <ion-select-option value="manual">Manual (una vez)</ion-select-option>
+                <ion-select-option value="diario">Diario</ion-select-option>
+                <ion-select-option value="semanal">Semanal</ion-select-option>
+                <ion-select-option value="mensual">Mensual</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </ion-list>
+
+          <div class="modal-actions">
+            <ion-button fill="outline" (click)="cerrarModalCrearReporte()">
+              Cancelar
+            </ion-button>
+            <ion-button type="submit" [disabled]="!nuevoReporte.nombre || (!nuevoReporte.incluirCaballos && !nuevoReporte.incluirFinanzas && !nuevoReporte.incluirServicios && !nuevoReporte.incluirInventario)">
+              <ion-icon name="checkmark" slot="start"></ion-icon>
+              Generar Reporte
+            </ion-button>
+          </div>
+        </form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>

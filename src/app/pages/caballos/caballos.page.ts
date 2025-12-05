@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
@@ -113,12 +113,18 @@ export class CaballosPage implements OnInit {
 
   constructor(
     private firebaseService: FirebaseService,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   async ngOnInit() {
-    this.userRole = this.authService.getRole();
-    this.canEdit = this.userRole === 'admin';
+    // Suscribirse a cambios en el usuario para actualizar permisos
+    this.authService.currentUser$.subscribe(user => {
+      this.userRole = user?.role || null;
+      this.canEdit = this.userRole === 'admin';
+      this.cdr.detectChanges();
+    });
+
     await this.cargarCriaderos();
     await this.cargarCaballos();
     this.actualizarOpcionesFiltroCriadero();
@@ -136,6 +142,7 @@ export class CaballosPage implements OnInit {
     try {
       this.caballos = await this.firebaseService.getCaballos(criaderoId);
       this.aplicarFiltros();
+      this.cdr.detectChanges();
     } catch (error) {
       console.error('Error cargando caballos:', error);
     }
@@ -236,6 +243,7 @@ export class CaballosPage implements OnInit {
   onFiltrosChange(values: FilterValues) {
     this.filtrosValues = values;
     this.aplicarFiltros();
+    this.cdr.detectChanges();
   }
 
   onFiltrosToggle(expanded: boolean | any) {

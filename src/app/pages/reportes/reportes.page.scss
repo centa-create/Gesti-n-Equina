@@ -1,0 +1,513 @@
+// Página de Reportes y Análisis - Gestión Equina
+
+.reportes-content {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  min-height: 100vh;
+}
+
+// Loading container
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+
+  ion-spinner {
+    margin-bottom: 16px;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    font-size: 16px;
+    margin: 0;
+  }
+}
+
+// Empty state cards
+.empty-state-card {
+  margin: 20px;
+  border-radius: 16px;
+  overflow: hidden;
+
+  .empty-state-icon {
+    font-size: 64px;
+    color: var(--ion-color-medium);
+    margin-bottom: 16px;
+  }
+
+  ion-card-content {
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  h3 {
+    color: var(--ion-color-dark);
+    margin-bottom: 8px;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    margin-bottom: 20px;
+  }
+
+  .empty-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
+// Header de reportes
+.reportes-header {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.8) 100%);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+
+  .criadero-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    ion-icon {
+      font-size: 32px;
+      color: var(--ion-color-primary);
+      padding: 12px;
+      background: rgba(var(--ion-color-primary-rgb), 0.1);
+      border-radius: 12px;
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--ion-color-dark);
+      margin: 0 0 4px 0;
+    }
+
+    .criadero-meta {
+      font-size: 14px;
+      color: var(--ion-color-medium);
+
+      span {
+        display: block;
+        margin-top: 2px;
+      }
+    }
+  }
+}
+
+// Sección de estadísticas disponibles
+.estadisticas-disponibles {
+  margin-bottom: 32px;
+
+  .seccion-titulo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ion-color-primary);
+    margin-bottom: 20px;
+    padding-left: 4px;
+
+    ion-icon {
+      font-size: 20px;
+    }
+  }
+
+  .estadisticas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+}
+
+// Cards de estadísticas
+.estadistica-card {
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.8) 100%);
+  backdrop-filter: blur(20px);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  // Colores específicos por tipo
+  &.caballos {
+    --border-color: #8b5cf6;
+    border-left: 4px solid #8b5cf6;
+  }
+
+  &.finanzas {
+    --border-color: #10b981;
+    border-left: 4px solid #10b981;
+  }
+
+  &.servicios {
+    --border-color: #f59e0b;
+    border-left: 4px solid #f59e0b;
+  }
+
+  &.inventario {
+    --border-color: #ef4444;
+    border-left: 4px solid #ef4444;
+  }
+
+  ion-card-content {
+    padding: 20px;
+  }
+
+  .estadistica-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+
+    .estadistica-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+
+      // Colores de iconos por tipo
+      .caballos & { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+      .finanzas & { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+      .servicios & { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+      .inventario & { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+    }
+
+    .estadistica-info {
+      flex: 1;
+
+      h3 {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--ion-color-dark);
+        margin: 0 0 4px 0;
+      }
+
+      .estadistica-desc {
+        font-size: 14px;
+        color: var(--ion-color-medium);
+        margin: 0;
+      }
+    }
+  }
+
+  .estadistica-metrics {
+    display: flex;
+    gap: 16px;
+
+    .metric {
+      flex: 1;
+      text-align: center;
+
+      .metric-value {
+        font-size: 20px;
+        font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
+
+        &.success { color: #10b981; }
+        &.danger { color: #ef4444; }
+        &.warning { color: #f59e0b; }
+      }
+
+      .metric-label {
+        font-size: 12px;
+        color: var(--ion-color-medium);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+  }
+}
+
+// Resumen ejecutivo
+.resumen-ejecutivo {
+  margin-bottom: 32px;
+  border-radius: 16px;
+  overflow: hidden;
+
+  ion-card-header {
+    background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-primary-tint) 100%);
+    color: white;
+
+    ion-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      ion-icon {
+        font-size: 20px;
+      }
+    }
+  }
+
+  ion-card-content {
+    padding: 24px 20px;
+  }
+
+  .resumen-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+  }
+
+  .resumen-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+
+    .resumen-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+
+      ion-icon {
+        color: white;
+      }
+
+      &[color="success"] { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+      &[color="primary"] { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
+      &[color="tertiary"] { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+    }
+
+    .resumen-content {
+      flex: 1;
+
+      h4 {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--ion-color-dark);
+        margin: 0 0 4px 0;
+      }
+
+      .resumen-value {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0;
+
+        &.success { color: #10b981; }
+        &.danger { color: #ef4444; }
+      }
+    }
+  }
+}
+
+// Gráfico principal
+.grafico-principal {
+  margin-bottom: 32px;
+  border-radius: 16px;
+  overflow: hidden;
+
+  ion-card-header {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+    ion-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      ion-icon {
+        font-size: 20px;
+        color: var(--ion-color-primary);
+      }
+    }
+
+    ion-card-subtitle {
+      color: var(--ion-color-medium);
+      font-size: 14px;
+    }
+  }
+
+  .chart-container {
+    position: relative;
+    height: 300px;
+    padding: 20px;
+  }
+}
+
+// Filtros de exportación
+.export-filters {
+  margin-bottom: 24px;
+  border-radius: 16px;
+  overflow: hidden;
+
+  ion-card-header {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.1) 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+    ion-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      ion-icon {
+        font-size: 20px;
+        color: #d97706;
+      }
+    }
+  }
+
+  ion-card-content {
+    padding: 20px;
+  }
+
+  ion-item {
+    --border-radius: 8px;
+    --padding-start: 12px;
+    --inner-padding-end: 12px;
+    margin-bottom: 16px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .export-actions {
+    margin-top: 20px;
+  }
+}
+
+// Responsive Design
+@media (max-width: 576px) {
+  .estadisticas-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .resumen-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reportes-header .criadero-info {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .estadistica-card .estadistica-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .estadistica-metrics {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .resumen-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+}
+
+@media (min-width: 768px) {
+  .estadisticas-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .resumen-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .estadisticas-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+// Modal para crear reporte
+.modal-content {
+  --padding-start: 20px;
+  --padding-end: 20px;
+  --padding-top: 20px;
+  --padding-bottom: 20px;
+  max-height: 80vh;
+  overflow-y: auto;
+
+  ion-list {
+    background: transparent;
+
+    ion-item {
+      --border-radius: 8px;
+      --padding-start: 16px;
+      --inner-padding-end: 16px;
+      margin-bottom: 12px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      ion-checkbox {
+        --size: 20px;
+        --checkbox-background-checked: var(--ion-color-primary);
+        --border-color-checked: var(--ion-color-primary);
+      }
+
+      ion-textarea {
+        --border-radius: 8px;
+      }
+    }
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--ion-color-light-shade);
+
+    ion-button {
+      min-width: 100px;
+    }
+  }
+}
+
+// Responsive para modal
+@media (max-width: 576px) {
+  .modal-content {
+    --padding-start: 16px;
+    --padding-end: 16px;
+
+    .modal-actions {
+      flex-direction: column;
+
+      ion-button {
+        width: 100%;
+      }
+    }
+  }
+}

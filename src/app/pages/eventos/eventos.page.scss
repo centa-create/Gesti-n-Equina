@@ -1,0 +1,651 @@
+// Vista mejorada de eventos - Gestión Equina
+
+.eventos-content {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+}
+
+// Próximos eventos destacados
+.proximos-eventos {
+  margin-bottom: 24px;
+
+  .seccion-titulo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ion-color-primary);
+    margin-bottom: 16px;
+    padding-left: 4px;
+
+    ion-icon {
+      font-size: 20px;
+    }
+  }
+
+  .proximos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 8px;
+
+    &::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 2px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--ion-color-primary);
+      border-radius: 2px;
+    }
+  }
+}
+
+.evento-destacado-card {
+  margin: 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 16px;
+  overflow: hidden;
+  scroll-snap-align: start;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  &.tipo-veterinaria {
+    --border-color: #10b981;
+    border-left: 4px solid #10b981;
+  }
+
+  &.tipo-competicion {
+    --border-color: #f59e0b;
+    border-left: 4px solid #f59e0b;
+  }
+
+  &.tipo-entrenamiento {
+    --border-color: #3b82f6;
+    border-left: 4px solid #3b82f6;
+  }
+
+  &.tipo-reproduccion {
+    --border-color: #ec4899;
+    border-left: 4px solid #ec4899;
+  }
+
+  &.tipo-mantenimiento {
+    --border-color: #6b7280;
+    border-left: 4px solid #6b7280;
+  }
+
+  &.tipo-otros {
+    --border-color: #8b5cf6;
+    border-left: 4px solid #8b5cf6;
+  }
+
+  .evento-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px 8px;
+
+    .evento-tipo-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ion-color-primary);
+      background: rgba(var(--ion-color-primary-rgb), 0.1);
+      padding: 4px 8px;
+      border-radius: 12px;
+
+      ion-icon {
+        font-size: 14px;
+      }
+    }
+  }
+
+  .evento-content {
+    padding: 8px 16px 16px;
+
+    .evento-titulo {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0 0 12px 0;
+      color: var(--ion-color-dark);
+      line-height: 1.3;
+    }
+
+    .evento-info {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 12px;
+
+      .info-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--ion-color-medium);
+
+        ion-icon {
+          font-size: 14px;
+          min-width: 14px;
+        }
+      }
+    }
+
+    .evento-countdown {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: rgba(245, 158, 11, 0.1);
+      color: #d97706;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+
+      ion-icon {
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+// Estadísticas modernas
+.stats-card-modern {
+  margin-bottom: 24px;
+
+  ion-card-content {
+    padding: 20px 16px;
+  }
+
+  .stats-grid-modern {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 16px;
+  }
+
+  .stat-card-modern {
+    text-align: center;
+    padding: 16px 12px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.8) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    &.total {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+
+      .stat-icon ion-icon {
+        color: rgba(255, 255, 255, 0.9);
+      }
+    }
+
+    &.proximos {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+
+      .stat-icon ion-icon {
+        color: rgba(255, 255, 255, 0.9);
+      }
+    }
+
+    &.completados {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+
+      .stat-icon ion-icon {
+        color: rgba(255, 255, 255, 0.9);
+      }
+    }
+
+    &.hoy {
+      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+      color: white;
+
+      .stat-icon ion-icon {
+        color: rgba(255, 255, 255, 0.9);
+      }
+    }
+
+    .stat-icon {
+      margin-bottom: 8px;
+
+      ion-icon {
+        font-size: 24px;
+        color: rgba(0, 0, 0, 0.6);
+      }
+    }
+
+    .stat-content {
+      h2 {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0 0 4px 0;
+        line-height: 1;
+      }
+
+      p {
+        font-size: 12px;
+        margin: 0;
+        opacity: 0.9;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Loading container
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+
+  ion-spinner {
+    margin-bottom: 16px;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    font-size: 14px;
+  }
+}
+
+// Vista de Lista Mejorada
+.eventos-lista-modern {
+  .fecha-divider {
+    --background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+    --color: var(--ion-color-primary);
+    font-weight: 600;
+    margin: 24px 0 8px 0;
+    border-radius: 12px;
+
+    ion-label {
+      h2 {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+
+      p {
+        font-size: 13px;
+        color: var(--ion-color-medium);
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+.evento-card-modern {
+  margin: 8px 0;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  &.tipo-veterinaria { border-left-color: #10b981; }
+  &.tipo-competicion { border-left-color: #f59e0b; }
+  &.tipo-entrenamiento { border-left-color: #3b82f6; }
+  &.tipo-reproduccion { border-left-color: #ec4899; }
+  &.tipo-mantenimiento { border-left-color: #6b7280; }
+  &.tipo-otros { border-left-color: #8b5cf6; }
+
+  .evento-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 16px;
+
+    .evento-titulo-section {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      flex: 1;
+
+      .evento-icono {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(var(--ion-color-primary-rgb), 0.1);
+        color: var(--ion-color-primary);
+
+        ion-icon {
+          font-size: 20px;
+        }
+      }
+
+      .evento-titulo-info {
+        flex: 1;
+
+        h3 {
+          font-size: 16px;
+          font-weight: 600;
+          margin: 0 0 4px 0;
+          color: var(--ion-color-dark);
+          line-height: 1.3;
+        }
+
+        .evento-tipo {
+          font-size: 13px;
+          color: var(--ion-color-primary);
+          font-weight: 500;
+        }
+      }
+    }
+
+    .evento-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+
+      .action-buttons {
+        display: flex;
+        gap: 4px;
+      }
+    }
+  }
+
+  .evento-card-content {
+    padding: 0 16px 16px;
+
+    .evento-detalles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+
+      .detalle-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--ion-color-medium);
+        background: rgba(0, 0, 0, 0.05);
+        padding: 6px 8px;
+        border-radius: 8px;
+
+        ion-icon {
+          font-size: 14px;
+          color: var(--ion-color-primary);
+        }
+      }
+    }
+
+    .evento-descripcion {
+      font-size: 14px;
+      color: var(--ion-color-dark);
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+
+    .evento-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+  }
+}
+
+// Vista de Calendario
+.calendario-vista {
+  .calendario-card {
+    margin: 16px 0;
+
+    .calendario-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .dia-calendario {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      padding: 8px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+
+      &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      &.dia-con-eventos {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+        border-color: var(--ion-color-primary);
+      }
+
+      &.dia-hoy {
+        background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-primary-tint) 100%);
+        color: white;
+        font-weight: 600;
+      }
+
+      .dia-numero {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .dia-nombre {
+        font-size: 10px;
+        color: var(--ion-color-medium);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .eventos-del-dia {
+        position: absolute;
+        bottom: 4px;
+        left: 4px;
+        right: 4px;
+        display: flex;
+        gap: 2px;
+
+        .evento-miniatura {
+          flex: 1;
+          height: 4px;
+          border-radius: 2px;
+          background: var(--ion-color-primary);
+
+          &.tipo-veterinaria { background: #10b981; }
+          &.tipo-competicion { background: #f59e0b; }
+          &.tipo-entrenamiento { background: #3b82f6; }
+          &.tipo-reproduccion { background: #ec4899; }
+          &.tipo-mantenimiento { background: #6b7280; }
+          &.tipo-otros { background: #8b5cf6; }
+        }
+
+        .mas-eventos {
+          font-size: 8px;
+          color: var(--ion-color-medium);
+          font-weight: 600;
+          align-self: center;
+        }
+      }
+    }
+  }
+}
+
+// Vista de Timeline
+.timeline-vista {
+  .timeline-container {
+    position: relative;
+    padding-left: 24px;
+
+    .timeline-line {
+      position: absolute;
+      left: 11px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--ion-color-primary) 0%, rgba(var(--ion-color-primary-rgb), 0.3) 100%);
+    }
+
+    .timeline-events {
+      .timeline-item {
+        position: relative;
+        margin-bottom: 24px;
+        padding-left: 24px;
+
+        &.estado-pendiente .timeline-marker { background: #f59e0b; }
+        &.estado-confirmado .timeline-marker { background: #3b82f6; }
+        &.estado-completado .timeline-marker { background: #10b981; }
+        &.estado-cancelado .timeline-marker { background: #ef4444; }
+
+        .timeline-marker {
+          position: absolute;
+          left: -20px;
+          top: 16px;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-size: 12px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+          ion-icon {
+            font-size: 12px;
+          }
+        }
+
+        .timeline-content {
+          background: rgba(255, 255, 255, 0.9);
+          border-radius: 12px;
+          padding: 16px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          border: 1px solid rgba(0, 0, 0, 0.05);
+
+          &:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+          }
+
+          .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+
+            h4 {
+              font-size: 16px;
+              font-weight: 600;
+              margin: 0;
+              color: var(--ion-color-dark);
+            }
+          }
+
+          .timeline-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: var(--ion-color-medium);
+
+            .timeline-fecha {
+              font-weight: 500;
+            }
+
+            .timeline-tipo {
+              color: var(--ion-color-primary);
+              font-weight: 500;
+            }
+          }
+
+          .timeline-desc {
+            font-size: 14px;
+            color: var(--ion-color-dark);
+            line-height: 1.4;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 576px) {
+  .proximos-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid-modern {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .evento-card-modern .evento-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+
+    .evento-actions {
+      flex-direction: row;
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+
+  .evento-detalles-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .calendario-grid {
+    grid-template-columns: repeat(7, 1fr);
+    font-size: 12px;
+  }
+}
+
+@media (min-width: 768px) {
+  .proximos-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+
+  .stats-grid-modern {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

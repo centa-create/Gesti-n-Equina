@@ -3,16 +3,115 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home"></ion-back-button>
     </ion-buttons>
-    <ion-title>Gestión de Eventos</ion-title>
-    <ion-buttons slot="end" *ngIf="canEdit">
-      <ion-button (click)="toggleForm()">
+    <ion-title>Eventos del Criadero</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cambiarVista('lista')" [color]="vistaActual === 'lista' ? 'primary' : 'medium'">
+        <ion-icon name="list"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cambiarVista('calendario')" [color]="vistaActual === 'calendario' ? 'primary' : 'medium'">
+        <ion-icon name="calendar"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cambiarVista('timeline')" [color]="vistaActual === 'timeline' ? 'primary' : 'medium'">
+        <ion-icon name="time"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="canEdit" (click)="toggleForm()" color="success">
         <ion-icon name="add"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content class="eventos-content">
+  <!-- Próximos Eventos Destacados -->
+  <div class="proximos-eventos" *ngIf="getEventosProximosLista().length > 0">
+    <h3 class="seccion-titulo">
+      <ion-icon name="alarm" color="warning"></ion-icon>
+      Próximos Eventos
+    </h3>
+    <div class="proximos-grid">
+      <ion-card
+        *ngFor="let evento of getEventosProximosLista()"
+        class="evento-destacado-card"
+        [ngClass]="getTipoClase(evento.tipo)"
+        (click)="verDetalleEvento(evento)">
+        <ion-card-header class="evento-header">
+          <div class="evento-tipo-badge">
+            <ion-icon [name]="getTipoIcono(evento.tipo)"></ion-icon>
+            <span>{{ getTipoLabel(evento.tipo) }}</span>
+          </div>
+          <ion-chip [color]="getEstadoColor(evento.estado)" size="small">
+            {{ evento.estado | titlecase }}
+          </ion-chip>
+        </ion-card-header>
+        <ion-card-content class="evento-content">
+          <h3 class="evento-titulo">{{ evento.titulo }}</h3>
+          <div class="evento-info">
+            <div class="info-item">
+              <ion-icon name="calendar" color="primary"></ion-icon>
+              <span>{{ getFechaFormateada(evento.fechaInicio) }}</span>
+            </div>
+            <div class="info-item" *ngIf="evento.ubicacion">
+              <ion-icon name="location" color="secondary"></ion-icon>
+              <span>{{ evento.ubicacion }}</span>
+            </div>
+            <div class="info-item" *ngIf="evento.caballoId">
+              <ion-icon name="paw" color="tertiary"></ion-icon>
+              <span>{{ getNombreCaballo(evento.caballoId) }}</span>
+            </div>
+          </div>
+          <div class="evento-countdown" *ngIf="getDiasRestantes(evento.fechaInicio) >= 0">
+            <ion-icon name="time" color="warning"></ion-icon>
+            <span>{{ getDiasRestantes(evento.fechaInicio) }} días</span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+
+  <!-- Estadísticas Mejoradas -->
+  <ion-card class="stats-card-modern" *ngIf="eventosFiltrados.length > 0">
+    <ion-card-content>
+      <div class="stats-grid-modern">
+        <div class="stat-card-modern total">
+          <div class="stat-icon">
+            <ion-icon name="calendar"></ion-icon>
+          </div>
+          <div class="stat-content">
+            <h2>{{ eventosFiltrados.length }}</h2>
+            <p>Eventos {{ filtrosValues['estado'] ? filtrosValues['estado'] + 's' : 'totales' }}</p>
+          </div>
+        </div>
+        <div class="stat-card-modern proximos">
+          <div class="stat-icon">
+            <ion-icon name="alarm"></ion-icon>
+          </div>
+          <div class="stat-content">
+            <h2>{{ getEventosProximos() }}</h2>
+            <p>Próximos (7 días)</p>
+          </div>
+        </div>
+        <div class="stat-card-modern completados">
+          <div class="stat-icon">
+            <ion-icon name="checkmark-circle"></ion-icon>
+          </div>
+          <div class="stat-content">
+            <h2>{{ getEventosCompletados() }}</h2>
+            <p>Completados</p>
+          </div>
+        </div>
+        <div class="stat-card-modern hoy">
+          <div class="stat-icon">
+            <ion-icon name="today"></ion-icon>
+          </div>
+          <div class="stat-content">
+            <h2>{{ getEventosHoy() }}</h2>
+            <p>Para hoy</p>
+          </div>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
   <!-- Filtros avanzados -->
   <app-advanced-filters
     [config]="filtrosConfig"
@@ -24,60 +123,156 @@
     (apply)="onFiltrosApply($event)">
   </app-advanced-filters>
 
-  <!-- Estadísticas -->
-  <ion-card class="stats-card" *ngIf="eventosFiltrados.length > 0">
-    <ion-card-content>
-      <div class="stats-grid">
-        <div class="stat-item">
-          <ion-icon name="calendar" color="primary"></ion-icon>
-          <div>
-            <h3>{{ eventosFiltrados.length }}</h3>
-            <p>Eventos {{ filtrosValues['estado'] ? filtrosValues['estado'] + 's' : 'totales' }}</p>
+  <!-- Loading Spinner -->
+  <div class="loading-container" *ngIf="isLoading">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando eventos...</p>
+  </div>
+
+  <!-- Vista de Lista Mejorada -->
+  <div *ngIf="!isLoading && vistaActual === 'lista'">
+    <ion-list class="eventos-lista-modern">
+      <ion-item-group *ngFor="let grupo of eventosAgrupados; trackBy: trackByFecha">
+        <ion-item-divider class="fecha-divider">
+          <ion-label>
+            <h2>{{ grupo.fecha | date:'EEEE, dd \'de\' MMMM \'de\' yyyy' | titlecase }}</h2>
+            <p>{{ grupo.eventos.length }} evento{{ grupo.eventos.length !== 1 ? 's' : '' }}</p>
+          </ion-label>
+        </ion-item-divider>
+
+        <ion-card
+          *ngFor="let evento of grupo.eventos"
+          class="evento-card-modern"
+          [ngClass]="getTipoClase(evento.tipo)"
+          (click)="verDetalleEvento(evento)">
+
+          <ion-card-header class="evento-card-header">
+            <div class="evento-titulo-section">
+              <div class="evento-icono">
+                <ion-icon [name]="getTipoIcono(evento.tipo)"></ion-icon>
+              </div>
+              <div class="evento-titulo-info">
+                <h3>{{ evento.titulo }}</h3>
+                <p class="evento-tipo">{{ getTipoLabel(evento.tipo) }}</p>
+              </div>
+            </div>
+            <div class="evento-actions">
+              <ion-chip [color]="getEstadoColor(evento.estado)" size="small">
+                {{ evento.estado | titlecase }}
+              </ion-chip>
+              <div class="action-buttons" *ngIf="canEdit">
+                <ion-button fill="clear" size="small" (click)="editarEvento(evento); $event.stopPropagation()">
+                  <ion-icon name="create" color="primary"></ion-icon>
+                </ion-button>
+                <ion-button fill="clear" size="small" (click)="eliminarEvento(evento.id); $event.stopPropagation()">
+                  <ion-icon name="trash" color="danger"></ion-icon>
+                </ion-button>
+              </div>
+            </div>
+          </ion-card-header>
+
+          <ion-card-content class="evento-card-content">
+            <div class="evento-detalles-grid">
+              <div class="detalle-item" *ngIf="evento.fechaInicio">
+                <ion-icon name="time-outline" color="medium"></ion-icon>
+                <span>{{ getHoraFormateada(evento.fechaInicio) }}</span>
+              </div>
+              <div class="detalle-item" *ngIf="evento.ubicacion">
+                <ion-icon name="location-outline" color="medium"></ion-icon>
+                <span>{{ evento.ubicacion }}</span>
+              </div>
+              <div class="detalle-item" *ngIf="evento.caballoId">
+                <ion-icon name="paw-outline" color="medium"></ion-icon>
+                <span>{{ getNombreCaballo(evento.caballoId) }}</span>
+              </div>
+              <div class="detalle-item" *ngIf="evento.responsable">
+                <ion-icon name="person-outline" color="medium"></ion-icon>
+                <span>{{ evento.responsable }}</span>
+              </div>
+              <div class="detalle-item" *ngIf="evento.costo">
+                <ion-icon name="cash-outline" color="medium"></ion-icon>
+                <span>${{ evento.costo }}</span>
+              </div>
+            </div>
+
+            <p class="evento-descripcion" *ngIf="evento.descripcion">{{ evento.descripcion }}</p>
+
+            <div class="evento-badges" *ngIf="evento.notas || evento.duracionHoras">
+              <ion-chip *ngIf="evento.duracionHoras" color="tertiary" size="small">
+                <ion-icon name="hourglass"></ion-icon>
+                {{ evento.duracionHoras }}h
+              </ion-chip>
+              <ion-chip *ngIf="evento.notas" color="warning" size="small">
+                <ion-icon name="document-text"></ion-icon>
+                Notas
+              </ion-chip>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </ion-item-group>
+    </ion-list>
+  </div>
+
+  <!-- Vista de Calendario -->
+  <div *ngIf="!isLoading && vistaActual === 'calendario'" class="calendario-vista">
+    <ion-card class="calendario-card">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="calendar" slot="start"></ion-icon>
+          Calendario de Eventos
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="calendario-grid">
+          <div class="dia-calendario"
+               *ngFor="let dia of diasCalendario"
+               [ngClass]="{'dia-con-eventos': dia.eventos.length > 0, 'dia-hoy': dia.esHoy}"
+               (click)="seleccionarDia(dia)">
+            <div class="dia-numero">{{ dia.numero }}</div>
+            <div class="dia-nombre">{{ dia.nombreCorto }}</div>
+            <div class="eventos-del-dia">
+              <div class="evento-miniatura"
+                   *ngFor="let evento of dia.eventos.slice(0, 3)"
+                   [ngClass]="getTipoClase(evento.tipo)">
+              </div>
+              <div class="mas-eventos" *ngIf="dia.eventos.length > 3">
+                +{{ dia.eventos.length - 3 }}
+              </div>
+            </div>
           </div>
         </div>
-        <div class="stat-item">
-          <ion-icon name="time" color="secondary"></ion-icon>
-          <div>
-            <h3>{{ getEventosProximos() }}</h3>
-            <p>Próximos (7 días)</p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Vista de Timeline -->
+  <div *ngIf="!isLoading && vistaActual === 'timeline'" class="timeline-vista">
+    <div class="timeline-container">
+      <div class="timeline-line"></div>
+      <div class="timeline-events">
+        <div class="timeline-item"
+             *ngFor="let evento of eventosOrdenados; trackBy: trackById"
+             [ngClass]="getEstadoClase(evento.estado)">
+          <div class="timeline-marker" [ngClass]="getTipoClase(evento.tipo)">
+            <ion-icon [name]="getTipoIcono(evento.tipo)"></ion-icon>
           </div>
-        </div>
-        <div class="stat-item">
-          <ion-icon name="checkmark-circle" color="success"></ion-icon>
-          <div>
-            <h3>{{ getEventosCompletados() }}</h3>
-            <p>Completados</p>
+          <div class="timeline-content" (click)="verDetalleEvento(evento)">
+            <div class="timeline-header">
+              <h4>{{ evento.titulo }}</h4>
+              <ion-chip [color]="getEstadoColor(evento.estado)" size="small">
+                {{ evento.estado | titlecase }}
+              </ion-chip>
+            </div>
+            <div class="timeline-meta">
+              <span class="timeline-fecha">{{ getFechaCompleta(evento.fechaInicio) }}</span>
+              <span class="timeline-tipo">{{ getTipoLabel(evento.tipo) }}</span>
+            </div>
+            <p class="timeline-desc" *ngIf="evento.descripcion">{{ evento.descripcion }}</p>
           </div>
         </div>
       </div>
-    </ion-card-content>
-  </ion-card>
-
-  <!-- Loading Spinner -->
-  <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
-
-  <!-- Lista de Eventos -->
-  <ion-list *ngIf="!isLoading">
-    <ion-item *ngFor="let evento of eventosFiltrados" lines="full">
-      <ion-label>
-        <h2>{{ evento.titulo }}</h2>
-        <p>{{ getFechaFormateada(evento.fechaInicio) }}</p>
-        <p *ngIf="evento.descripcion">{{ evento.descripcion }}</p>
-        <p *ngIf="evento.ubicacion">📍 {{ evento.ubicacion }}</p>
-        <p *ngIf="evento.caballoId">🐎 {{ getNombreCaballo(evento.caballoId) }}</p>
-        <p *ngIf="evento.tipo">🏷️ {{ getTipoLabel(evento.tipo) }}</p>
-      </ion-label>
-      <ion-chip slot="end" [color]="getEstadoColor(evento.estado)">
-        {{ evento.estado | titlecase }}
-      </ion-chip>
-      <ion-button slot="end" fill="clear" color="primary" *ngIf="canEdit" (click)="editarEvento(evento); $event.stopPropagation()">
-        <ion-icon name="create"></ion-icon>
-      </ion-button>
-      <ion-button slot="end" fill="clear" color="danger" *ngIf="canEdit" (click)="eliminarEvento(evento.id); $event.stopPropagation()">
-        <ion-icon name="trash"></ion-icon>
-      </ion-button>
-    </ion-item>
-  </ion-list>
+    </div>
+  </div>
 
   <!-- Formulario para Evento -->
   <ion-card *ngIf="showForm && canEdit">

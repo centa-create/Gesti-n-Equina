@@ -200,8 +200,8 @@ export class HomePage implements OnInit, OnDestroy {
 
   async loadProduccionData() {
     try {
-      // Cargar datos de producción
-      this.produccionData = await this.firebaseService.getCollection('produccion') || [];
+      // Cargar datos de producción (manejar errores de permisos)
+      this.produccionData = await this.firebaseService.getCollection('produccion').catch(() => []);
 
       // Calcular estadísticas
       this.produccionStats = {
@@ -221,7 +221,15 @@ export class HomePage implements OnInit, OnDestroy {
       this.generateChartData();
 
     } catch (error) {
-      console.error('Error loading produccion data:', error);
+      console.warn('No se pudieron cargar datos de producción (colección no disponible):', error);
+      // Mantener datos vacíos para evitar errores
+      this.produccionData = [];
+      this.produccionStats = {
+        totalIngresos: 0,
+        totalCostos: 0,
+        beneficioNeto: 0,
+        produccionesMes: 0
+      };
     }
   }
 

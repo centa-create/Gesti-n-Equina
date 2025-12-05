@@ -1,11 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, AlertController, ToastController } from '@ionic/angular';
+import { IonicModule, AlertController, ToastController, ModalController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { EcommerceService, CaballoVenta } from '../../services/ecommerce.service';
 import { AuthService } from '../../services/auth.service';
+import { FirebaseService } from '../../services/firebase.service';
+import { CriaderoActivoService } from '../../services/criadero-activo.service';
 
 @Component({
   selector: 'app-marketplace',
@@ -20,6 +22,18 @@ export class MarketplacePage implements OnInit, OnDestroy {
   caballosFiltrados: CaballoVenta[] = [];
   loading = false;
   userRole: string = '';
+
+  // Propiedades para publicar anuncio
+  caballosDisponibles: any[] = [];
+  showPublicarForm = false;
+  nuevoAnuncio = {
+    caballoId: '',
+    precio: 0,
+    descripcion: '',
+    negociable: false,
+    destacado: false,
+    imagenes: [] as string[]
+  };
 
   // Filtros avanzados
   filtros = {
@@ -59,7 +73,10 @@ export class MarketplacePage implements OnInit, OnDestroy {
     private authService: AuthService,
     private alertController: AlertController,
     private toastController: ToastController,
-    private router: Router
+    private router: Router,
+    private modalController: ModalController,
+    private firebaseService: FirebaseService,
+    private criaderoService: CriaderoActivoService
   ) {}
 
   ngOnInit() {
@@ -273,6 +290,137 @@ export class MarketplacePage implements OnInit, OnDestroy {
       position: 'bottom'
     });
     await toast.present();
+  }
+
+  async publicarAnuncio() {
+    if (this.userRole !== 'admin') {
+      this.mostrarToast('Solo los administradores pueden publicar anuncios', 'warning');
+      return;
+    }
+
+    // Cargar caballos disponibles para vender
+    await this.cargarCaballosDisponibles();
+
+    if (this.caballosDisponibles.length === 0) {
+      this.mostrarToast('No tienes caballos disponibles para vender', 'warning');
+      return;
+    }
+
+    // Usar un alert más simple con inputs separados
+    const alert = await this.alertController.create({
+      header: 'Publicar Anuncio',
+      message: 'Ingresa los detalles del anuncio',
+      inputs: [
+        {
+          name: 'caballoSeleccionado',
+          type: 'text',
+          placeholder: `Ej: ${this.caballosDisponibles[0]?.nombre || 'Nombre del caballo'}`
+        },
+        {
+          name: 'precio',
+          type: 'number',
+          placeholder: 'Precio en COP',
+          min: 0
+        },
+        {
+          name: 'descripcion',
+          type: 'textarea',
+          placeholder: 'Descripción del caballo...'
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Publicar',
+          handler: async (data) => {
+            if (data.caballoSeleccionado && data.precio && data.descripcion) {
+              // Buscar el caballo por nombre
+              const caballoSeleccionado = this.caballosDisponibles.find(c =>
+                c.nombre.toLowerCase().includes(data.caballoSeleccionado.toLowerCase())
+              );
+
+              if (caballoSeleccionado) {
+                await this.crearAnuncio({
+                  caballoId: caballoSeleccionado.id,
+                  precio: data.precio,
+                  descripcion: data.descripcion
+                });
+                return true;
+              } else {
+                this.mostrarToast('Caballo no encontrado', 'warning');
+                return false;
+              }
+            } else {
+              this.mostrarToast('Completa todos los campos', 'warning');
+              return false;
+            }
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  private async cargarCaballosDisponibles() {
+    try {
+      const criaderoActivo = this.criaderoService.getCriaderoActivo();
+      if (criaderoActivo) {
+        this.caballosDisponibles = await this.firebaseService.queryDocuments('caballos', [
+          { field: 'criaderoId', operator: '==', value: criaderoActivo.id },
+          { field: 'estado', operator: '==', value: 'activo' }
+        ]);
+      }
+    } catch (error) {
+      console.error('Error cargando caballos disponibles:', error);
+      this.caballosDisponibles = [];
+    }
+  }
+
+  private async crearAnuncio(data: any) {
+    try {
+      const criaderoActivo = this.criaderoService.getCriaderoActivo();
+      const caballoSeleccionado = this.caballosDisponibles.find(c => c.id === data.caballoId);
+
+      if (!criaderoActivo || !caballoSeleccionado) {
+        this.mostrarToast('Error: Criadero o caballo no encontrado', 'danger');
+        return;
+      }
+
+      const anuncioData = {
+        caballoId: data.caballoId,
+        nombre: caballoSeleccionado.nombre,
+        nombreCriadero: criaderoActivo.nombre,
+        precio: parseFloat(data.precio),
+        descripcion: data.descripcion,
+        edad: caballoSeleccionado.edad || 0,
+        sexo: caballoSeleccionado.sexo || 'macho',
+        raza: caballoSeleccionado.raza || 'No especificada',
+        pelaje: caballoSeleccionado.pelaje || 'No especificado',
+        altura: caballoSeleccionado.altura,
+        peso: caballoSeleccionado.peso,
+        criaderoId: criaderoActivo.id,
+        criaderoNombre: criaderoActivo.nombre,
+        ubicacion: criaderoActivo.ubicacion || 'No especificada',
+        imagenes: caballoSeleccionado.imagenes || ['/assets/images/caballo-default.jpg'],
+        documentos: [],
+        caracteristicas: [],
+        activo: true,
+        destacado: false,
+        negociable: false,
+        createdBy: this.authService.getCurrentUser()?.id || ''
+      };
+
+      await this.ecommerceService.publicarCaballoVenta(anuncioData);
+      this.mostrarToast('Anuncio publicado exitosamente', 'success');
+      this.cargarDatos(); // Recargar la lista
+    } catch (error) {
+      console.error('Error creando anuncio:', error);
+      this.mostrarToast('Error al publicar el anuncio', 'danger');
+    }
   }
 
   private async mostrarAlerta(header: string, message: string) {

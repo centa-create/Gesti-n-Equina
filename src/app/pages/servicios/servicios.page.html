@@ -3,14 +3,212 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home"></ion-back-button>
     </ion-buttons>
-    <ion-title>servicios</ion-title>
+    <ion-title>Servicios</ion-title>
+    <ion-buttons slot="end" *ngIf="canEdit">
+      <ion-button (click)="toggleForm()">
+        <ion-icon name="add"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" class="ion-padding">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">servicios</ion-title>
+      <ion-title size="large">Servicios</ion-title>
     </ion-toolbar>
   </ion-header>
+
+  <!-- Loading Spinner -->
+  <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+
+  <!-- Resumen de Servicios -->
+  <div *ngIf="!isLoading && serviciosFiltrados.length > 0">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Resumen de Servicios</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="6">
+              <div class="metric-card">
+                <h3 class="metric-value">{{ serviciosFiltrados.length }}</h3>
+                <p class="metric-label">Total Servicios</p>
+              </div>
+            </ion-col>
+            <ion-col size="6">
+              <div class="metric-card">
+                <h3 class="metric-value">{{ getServiciosRecientes() }}</h3>
+                <p class="metric-label">Últimos 30 días</p>
+              </div>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="12">
+              <div class="metric-card">
+                <h3 class="metric-value success">${{ getCostoTotal().toFixed(2) }}</h3>
+                <p class="metric-label">Costo Total</p>
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Filtros Avanzados -->
+  <app-advanced-filters
+    *ngIf="!isLoading"
+    [config]="filtrosConfig"
+    [values]="filtrosValues"
+    [isExpanded]="filtrosExpanded"
+    (filtersChange)="onFiltrosChange($event)"
+    (toggle)="onFiltrosToggle($event)"
+    (clear)="onFiltrosClear()"
+    (apply)="onFiltrosApply($event)">
+  </app-advanced-filters>
+
+  <!-- Lista de Servicios -->
+  <ion-list *ngIf="!isLoading && serviciosFiltrados.length > 0">
+    <ion-item *ngFor="let servicio of serviciosFiltrados" lines="full">
+      <ion-label>
+        <h2>{{ getTipoServicioLabel(servicio.tipoServicio) }}</h2>
+        <p>{{ servicio.descripcion }}</p>
+        <p>Caballo: {{ getNombreCaballo(servicio.caballoId) }}</p>
+        <p>Fecha: {{ servicio.fechaRealizacion | firestoreDate:'short' }}</p>
+        <p *ngIf="servicio.proximaFecha">Próxima: {{ servicio.proximaFecha | firestoreDate:'short' }}</p>
+        <p *ngIf="servicio.observaciones">Observaciones: {{ servicio.observaciones }}</p>
+      </ion-label>
+      <ion-chip slot="end" color="primary">
+        ${{ (servicio.costo / 100).toFixed(2) }}
+      </ion-chip>
+      <ion-button slot="end" fill="clear" color="danger" (click)="eliminarServicio(servicio.id)" *ngIf="canEdit">
+        <ion-icon name="trash"></ion-icon>
+      </ion-button>
+    </ion-item>
+  </ion-list>
+
+  <!-- Formulario Nuevo Servicio -->
+  <ion-card *ngIf="showForm && canEdit">
+    <ion-card-header>
+      <ion-card-title>Nuevo Servicio</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <form (ngSubmit)="agregarServicio()">
+        <ion-item>
+          <ion-select
+            label="Caballo"
+            [(ngModel)]="nuevoServicio.caballoId"
+            name="caballoId"
+            required>
+            <ion-select-option
+              *ngFor="let caballo of caballos"
+              [value]="caballo.id">
+              {{ caballo.nombre }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-select
+            label="Tipo de Servicio"
+            [(ngModel)]="nuevoServicio.tipoServicio"
+            name="tipoServicio"
+            required>
+            <ion-select-option value="herraje">Herraje</ion-select-option>
+            <ion-select-option value="desparasitacion">Desparasitación</ion-select-option>
+            <ion-select-option value="vacunacion">Vacunación</ion-select-option>
+            <ion-select-option value="limpieza">Limpieza</ion-select-option>
+            <ion-select-option value="alimentacion">Alimentación</ion-select-option>
+            <ion-select-option value="entrenamiento">Entrenamiento</ion-select-option>
+            <ion-select-option value="veterinario">Veterinario</ion-select-option>
+            <ion-select-option value="otros">Otros</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Descripción"
+            [(ngModel)]="nuevoServicio.descripcion"
+            name="descripcion"
+            required
+            placeholder="Descripción del servicio">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Costo"
+            type="number"
+            [(ngModel)]="nuevoServicio.costo"
+            name="costo"
+            required
+            placeholder="0.00"
+            min="0"
+            step="0.01">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-datetime
+            label="Fecha de Realización"
+            [(ngModel)]="nuevoServicio.fechaRealizacion"
+            name="fechaRealizacion"
+            presentation="date"
+            required>
+          </ion-datetime>
+        </ion-item>
+
+        <ion-item>
+          <ion-datetime
+            label="Próxima Fecha"
+            [(ngModel)]="nuevoServicio.proximaFecha"
+            name="proximaFecha"
+            presentation="date">
+          </ion-datetime>
+        </ion-item>
+
+        <ion-item>
+          <ion-textarea
+            label="Observaciones"
+            [(ngModel)]="nuevoServicio.observaciones"
+            name="observaciones"
+            placeholder="Observaciones adicionales"
+            rows="3">
+          </ion-textarea>
+        </ion-item>
+
+        <div class="ion-padding">
+          <ion-button
+            type="submit"
+            expand="full"
+            [disabled]="isLoading || !nuevoServicio.caballoId || !nuevoServicio.fechaRealizacion">
+            <ion-icon *ngIf="isLoading" name="refresh" slot="start"></ion-icon>
+            {{ isLoading ? 'Guardando...' : 'Guardar Servicio' }}
+          </ion-button>
+          <ion-button
+            fill="clear"
+            expand="full"
+            color="medium"
+            (click)="toggleForm()">
+            Cancelar
+          </ion-button>
+        </div>
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Mensaje cuando no hay servicios -->
+  <ion-card *ngIf="!isLoading && serviciosFiltrados.length === 0 && !showForm">
+    <ion-card-content class="ion-text-center">
+      <ion-icon name="construct-outline" size="large" color="medium"></ion-icon>
+      <h3>No hay servicios registrados</h3>
+      <p>Registra el primer servicio para tus caballos</p>
+      <ion-button (click)="toggleForm()" *ngIf="canEdit">
+        <ion-icon name="add" slot="start"></ion-icon>
+        Nuevo Servicio
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
 </ion-content>

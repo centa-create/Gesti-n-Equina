@@ -90,6 +90,21 @@ export class EventosPage implements OnInit {
   filtrosValues: FilterValues = {};
   filtrosExpanded: boolean = false;
 
+  // Sistema de vistas múltiples
+  vistaActual: 'lista' | 'calendario' | 'timeline' = 'lista';
+
+  // Datos para vistas avanzadas
+  eventosAgrupados: any[] = [];
+  eventosOrdenados: any[] = [];
+  diasCalendario: any[] = [];
+
+  // Opciones para slides
+  slideOpts = {
+    slidesPerView: 1.2,
+    spaceBetween: 10,
+    centeredSlides: false
+  };
+
   constructor(
     private firebaseService: FirebaseService,
     private authService: AuthService
@@ -337,5 +352,202 @@ export class EventosPage implements OnInit {
   onFiltrosApply(values: FilterValues) {
     this.filtrosValues = values;
     this.aplicarFiltros();
+  }
+
+  // ====================
+  // MÉTODOS PARA VISTAS AVANZADAS
+  // ====================
+
+  cambiarVista(vista: 'lista' | 'calendario' | 'timeline') {
+    this.vistaActual = vista;
+    if (vista === 'lista') {
+      this.agruparEventosPorFecha();
+    } else if (vista === 'calendario') {
+      this.generarCalendario();
+    } else if (vista === 'timeline') {
+      this.ordenarEventosParaTimeline();
+    }
+  }
+
+  // Vista de Lista Mejorada
+  agruparEventosPorFecha() {
+    const grupos: { [key: string]: any[] } = {};
+
+    this.eventosFiltrados.forEach(evento => {
+      const fecha = evento.fechaInicio?.toDate ? evento.fechaInicio.toDate() : new Date(evento.fechaInicio);
+      const fechaKey = fecha.toISOString().split('T')[0];
+
+      if (!grupos[fechaKey]) {
+        grupos[fechaKey] = [];
+      }
+      grupos[fechaKey].push(evento);
+    });
+
+    this.eventosAgrupados = Object.keys(grupos)
+      .sort()
+      .map(fecha => ({
+        fecha,
+        eventos: grupos[fecha]
+      }));
+  }
+
+  trackByFecha(index: number, item: any): string {
+    return item.fecha;
+  }
+
+  // Vista de Calendario
+  generarCalendario() {
+    const hoy = new Date();
+    const mesActual = hoy.getMonth();
+    const anoActual = hoy.getFullYear();
+
+    const primerDia = new Date(anoActual, mesActual, 1);
+    const ultimoDia = new Date(anoActual, mesActual + 1, 0);
+    const diasEnMes = ultimoDia.getDate();
+
+    this.diasCalendario = [];
+
+    for (let dia = 1; dia <= diasEnMes; dia++) {
+      const fecha = new Date(anoActual, mesActual, dia);
+      const fechaKey = fecha.toISOString().split('T')[0];
+
+      const eventosDelDia = this.eventosFiltrados.filter(evento => {
+        const fechaEvento = evento.fechaInicio?.toDate ? evento.fechaInicio.toDate() : new Date(evento.fechaInicio);
+        return fechaEvento.toISOString().split('T')[0] === fechaKey;
+      });
+
+      this.diasCalendario.push({
+        numero: dia,
+        nombreCorto: fecha.toLocaleDateString('es-ES', { weekday: 'short' }),
+        fecha: fecha,
+        eventos: eventosDelDia,
+        esHoy: fecha.toDateString() === hoy.toDateString()
+      });
+    }
+  }
+
+  seleccionarDia(dia: any) {
+    // Aquí se podría implementar navegación a vista detallada del día
+    console.log('Día seleccionado:', dia);
+  }
+
+  // Vista de Timeline
+  ordenarEventosParaTimeline() {
+    this.eventosOrdenados = [...this.eventosFiltrados].sort((a, b) => {
+      const fechaA = a.fechaInicio?.toDate ? a.fechaInicio.toDate() : new Date(a.fechaInicio);
+      const fechaB = b.fechaInicio?.toDate ? b.fechaInicio.toDate() : new Date(b.fechaInicio);
+      return fechaA.getTime() - fechaB.getTime();
+    });
+  }
+
+  trackById(index: number, item: any): string {
+    return item.id;
+  }
+
+  // ====================
+  // MÉTODOS DE UTILIDAD PARA VISTAS
+  // ====================
+
+  getEventosProximosLista(): any[] {
+    const ahora = new Date();
+    const semanaDespues = new Date();
+    semanaDespues.setDate(ahora.getDate() + 7);
+
+    return this.eventosFiltrados
+      .filter(evento => {
+        const fechaEvento = evento.fechaInicio?.toDate ? evento.fechaInicio.toDate() : new Date(evento.fechaInicio);
+        return fechaEvento >= ahora && fechaEvento <= semanaDespues && evento.estado !== 'completado';
+      })
+      .slice(0, 5); // Máximo 5 eventos destacados
+  }
+
+  getDiasRestantes(fecha: any): number {
+    const fechaEvento = fecha?.toDate ? fecha.toDate() : new Date(fecha);
+    const ahora = new Date();
+    const diferencia = fechaEvento.getTime() - ahora.getTime();
+    return Math.ceil(diferencia / (1000 * 60 * 60 * 24));
+  }
+
+  getEventosHoy(): number {
+    const hoy = new Date();
+    const hoyKey = hoy.toISOString().split('T')[0];
+
+    return this.eventosFiltrados.filter(evento => {
+      const fechaEvento = evento.fechaInicio?.toDate ? evento.fechaInicio.toDate() : new Date(evento.fechaInicio);
+      return fechaEvento.toISOString().split('T')[0] === hoyKey;
+    }).length;
+  }
+
+  // Mapeos de colores e iconos
+  getTipoClase(tipo: string): string {
+    const clases: { [key: string]: string } = {
+      'cita_veterinaria': 'tipo-veterinaria',
+      'competicion': 'tipo-competicion',
+      'entrenamiento': 'tipo-entrenamiento',
+      'reproduccion': 'tipo-reproduccion',
+      'mantenimiento': 'tipo-mantenimiento',
+      'otros': 'tipo-otros'
+    };
+    return clases[tipo] || 'tipo-otros';
+  }
+
+  getTipoIcono(tipo: string): string {
+    const iconos: { [key: string]: string } = {
+      'cita_veterinaria': 'medkit',
+      'competicion': 'trophy',
+      'entrenamiento': 'fitness',
+      'reproduccion': 'heart',
+      'mantenimiento': 'build',
+      'otros': 'calendar'
+    };
+    return iconos[tipo] || 'calendar';
+  }
+
+  getEstadoClase(estado: string): string {
+    const clases: { [key: string]: string } = {
+      'pendiente': 'estado-pendiente',
+      'confirmado': 'estado-confirmado',
+      'completado': 'estado-completado',
+      'cancelado': 'estado-cancelado'
+    };
+    return clases[estado] || 'estado-pendiente';
+  }
+
+  // Métodos de formato mejorados
+  getHoraFormateada(fecha: any): string {
+    if (!fecha) return '';
+    const fechaObj = fecha?.toDate ? fecha.toDate() : new Date(fecha);
+    return fechaObj.toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  getFechaCompleta(fecha: any): string {
+    if (!fecha) return 'Fecha no definida';
+    const fechaObj = fecha?.toDate ? fecha.toDate() : new Date(fecha);
+    return fechaObj.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  // Modal de detalle de evento
+  async verDetalleEvento(evento: any) {
+    // Aquí se implementaría un modal con detalles completos del evento
+    console.log('Ver detalle del evento:', evento);
+    // Por ahora, solo mostramos una alerta simple
+    alert(`Evento: ${evento.titulo}\nTipo: ${this.getTipoLabel(evento.tipo)}\nFecha: ${this.getFechaCompleta(evento.fechaInicio)}\nEstado: ${evento.estado}`);
+  }
+
+  ngAfterViewInit() {
+    // Inicializar vista por defecto
+    setTimeout(() => {
+      this.agruparEventosPorFecha();
+    }, 100);
   }
 }

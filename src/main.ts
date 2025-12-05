@@ -4,6 +4,7 @@ import { RouteReuseStrategy, provideRouter, withPreloading, PreloadAllModules } 
 import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
+  logOutOutline,
   logOut,
   business,
   pawOutline,
@@ -82,6 +83,7 @@ import { AppComponent } from './app/app.component';
 import { AuthInterceptor } from './app/interceptors/auth.interceptor';
 
 addIcons({
+  logOutOutline,
   logOut,
   business,
   pawOutline,

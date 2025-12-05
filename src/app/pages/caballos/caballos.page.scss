@@ -1,0 +1,723 @@
+/* ===========================================
+   🐎 GESTIÓN DE CABALLOS - VISTA PROFESIONAL
+   Diseño Empresarial Premium 2025
+   =========================================== */
+
+.professional-content {
+  --background: var(--gradient-dark);
+  min-height: 100vh;
+  position: relative;
+  padding: 16px;
+
+  // 🌾 Fondo agrícola premium
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+      radial-gradient(circle at 20% 80%, rgba(139, 69, 19, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(34, 139, 34, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(218, 165, 32, 0.2) 0%, transparent 50%);
+    animation: float 25s ease-in-out infinite;
+    pointer-events: none;
+    filter: blur(1px);
+  }
+}
+
+/* ===========================================
+   📋 HEADER PROFESIONAL
+   =========================================== */
+
+.professional-toolbar {
+  --background: var(--gradient-card);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow-sm);
+}
+
+.professional-title {
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: var(--gray-900);
+
+  .title-icon {
+    margin-right: 8px;
+    font-size: 1.6rem;
+    color: var(--primary-color);
+  }
+}
+
+.add-button {
+  --border-radius: var(--border-radius-xl);
+  font-weight: 600;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-bounce);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+/* ===========================================
+   🔍 SECCIÓN DE FILTROS
+   =========================================== */
+
+.filters-section {
+  margin-bottom: 24px;
+  animation: slideDown 0.6s ease-out;
+}
+
+/* ===========================================
+   📊 DASHBOARD DE ESTADÍSTICAS
+   =========================================== */
+
+.dashboard-section {
+  margin-bottom: 32px;
+  animation: fadeInUp 0.8s ease-out;
+
+  .section-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: white;
+    text-align: center;
+    margin-bottom: 20px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.stats-dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  --background: var(--gradient-card);
+  backdrop-filter: blur(20px);
+  border-radius: var(--border-radius-2xl);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: var(--transition-bounce);
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-2xl);
+  }
+
+  ion-card-content {
+    padding: 20px;
+    text-align: center;
+  }
+
+  .stat-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+
+    ion-icon {
+      font-size: 2rem;
+      margin-right: 12px;
+    }
+
+    .stat-label {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--gray-700);
+    }
+  }
+
+  .stat-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin-bottom: 4px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .stat-subtitle {
+    font-size: 0.9rem;
+    color: var(--gray-600);
+    font-weight: 500;
+  }
+
+  // Variantes de colores
+  &.total {
+    .stat-value { color: var(--primary-color); }
+    ion-icon { color: var(--primary-color); }
+  }
+
+  &.gender {
+    .stat-value { color: var(--secondary-color); }
+    ion-icon { color: var(--secondary-color); }
+  }
+
+  &.age {
+    .stat-value { color: var(--accent-color); }
+    ion-icon { color: var(--tertiary); }
+  }
+}
+
+/* ===========================================
+   🐎 GALERÍA DE CABALLOS
+   =========================================== */
+
+.horses-section {
+  animation: fadeInUp 1s ease-out;
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    text-align: center;
+    margin-bottom: 24px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.horses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.horse-card {
+  --background: var(--gradient-card);
+  backdrop-filter: blur(20px);
+  border-radius: var(--border-radius-2xl);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: var(--transition-bounce);
+  overflow: hidden;
+  position: relative;
+
+  &:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: var(--shadow-2xl);
+  }
+
+  // Efecto de brillo premium
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.8s ease;
+    z-index: 1;
+  }
+
+  &:hover::before {
+    left: 100%;
+  }
+}
+
+.horse-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 2;
+}
+
+.horse-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+  box-shadow: var(--shadow-md);
+
+  ion-icon {
+    font-size: 1.5rem;
+    color: white;
+  }
+}
+
+.horse-info {
+  flex: 1;
+
+  .horse-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0 0 4px 0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+
+  .horse-subtitle {
+    font-size: 0.9rem;
+    color: var(--gray-600);
+    margin: 0;
+
+    .breed {
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+  }
+}
+
+.horse-status {
+  .status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    &.status-activo {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--success-color);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    &.status-inactivo {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--warning-color);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    &.status-fallecido {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger-color);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    &.status-vendido {
+      background: rgba(139, 92, 246, 0.1);
+      color: var(--tertiary);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+  }
+}
+
+.horse-details {
+  padding: 16px 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: var(--border-radius);
+  font-size: 0.85rem;
+
+  ion-icon {
+    margin-right: 8px;
+    color: var(--gray-600);
+    font-size: 1rem;
+  }
+
+  span {
+    color: var(--gray-800);
+    font-weight: 500;
+  }
+}
+
+.horse-lineage {
+  margin-top: 16px;
+  padding: 12px;
+  background: rgba(139, 69, 19, 0.05);
+  border-radius: var(--border-radius-lg);
+  border-left: 4px solid var(--primary-color);
+
+  h4 {
+    margin: 0 0 8px 0;
+    font-size: 1rem;
+    color: var(--primary-color);
+    font-weight: 600;
+  }
+
+  .lineage-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.9rem;
+    color: var(--gray-700);
+
+    span {
+      strong {
+        color: var(--primary-color);
+      }
+    }
+  }
+}
+
+.horse-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+
+  ion-button {
+    flex: 1;
+    --border-radius: var(--border-radius-lg);
+    font-weight: 600;
+  }
+}
+
+/* ===========================================
+   📝 FORMULARIO PROFESIONAL
+   =========================================== */
+
+.form-section {
+  animation: slideUp 0.6s ease-out;
+}
+
+.form-card {
+  --background: var(--gradient-card);
+  backdrop-filter: blur(25px);
+  border-radius: var(--border-radius-3xl);
+  box-shadow: var(--shadow-2xl);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  overflow: hidden;
+  margin: 0 auto;
+  max-width: 800px;
+}
+
+.form-header {
+  padding: 24px 32px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.form-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .form-icon {
+    margin-right: 12px;
+    font-size: 1.8rem;
+    color: var(--primary-color);
+  }
+}
+
+.form-subtitle {
+  font-size: 1rem;
+  color: var(--gray-600);
+  margin: 0;
+  font-weight: 400;
+}
+
+.form-content {
+  padding: 32px;
+}
+
+.horse-form {
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+  }
+
+  .form-section-basic,
+  .form-section-physical {
+    .section-label {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+
+      &::before {
+        content: '';
+        width: 4px;
+        height: 20px;
+        background: var(--gradient-primary);
+        margin-right: 12px;
+        border-radius: 2px;
+      }
+    }
+  }
+
+  .form-item {
+    margin-bottom: 16px;
+
+    .premium-input {
+      --background: rgba(255, 255, 255, 0.9);
+      --border-radius: var(--border-radius-xl);
+      --border-color: rgba(0, 0, 0, 0.1);
+      --color: var(--gray-900);
+      --placeholder-color: var(--gray-500);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition-bounce);
+
+      &:focus {
+        --border-color: var(--primary-color);
+        box-shadow: var(--shadow-md), 0 0 0 3px rgba(16, 185, 129, 0.1);
+      }
+    }
+  }
+
+  .form-section-observations {
+    .section-label {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+
+      &::before {
+        content: '';
+        width: 4px;
+        height: 20px;
+        background: var(--gradient-primary);
+        margin-right: 12px;
+        border-radius: 2px;
+      }
+    }
+
+    .premium-textarea {
+      --background: rgba(255, 255, 255, 0.9);
+      --border-radius: var(--border-radius-xl);
+      --border-color: rgba(0, 0, 0, 0.1);
+      --color: var(--gray-900);
+      --placeholder-color: var(--gray-500);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition-bounce);
+
+      &:focus {
+        --border-color: var(--primary-color);
+        box-shadow: var(--shadow-md), 0 0 0 3px rgba(16, 185, 129, 0.1);
+      }
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 32px;
+
+    @media (max-width: 480px) {
+      flex-direction: column;
+    }
+
+    .submit-button {
+      min-width: 200px;
+      --border-radius: var(--border-radius-xl);
+      font-weight: 700;
+      font-size: 1.1rem;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .cancel-button {
+      min-width: 150px;
+      --border-radius: var(--border-radius-xl);
+      font-weight: 600;
+    }
+  }
+}
+
+/* ===========================================
+   📭 ESTADO VACÍO PROFESIONAL
+   =========================================== */
+
+.empty-state {
+  animation: fadeIn 1s ease-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.empty-card {
+  --background: var(--gradient-card);
+  backdrop-filter: blur(20px);
+  border-radius: var(--border-radius-3xl);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+}
+
+.empty-content {
+  padding: 48px 32px;
+}
+
+.empty-icon {
+  margin-bottom: 24px;
+
+  ion-icon {
+    font-size: 4rem;
+    color: var(--gray-400);
+    opacity: 0.7;
+  }
+}
+
+.empty-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0 0 16px 0;
+}
+
+.empty-description {
+  font-size: 1rem;
+  color: var(--gray-600);
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.empty-action-button {
+  --border-radius: var(--border-radius-xl);
+  font-weight: 600;
+  font-size: 1.1rem;
+  box-shadow: var(--shadow-lg);
+}
+
+/* ===========================================
+   📱 RESPONSIVE DESIGN
+   =========================================== */
+
+@media (max-width: 768px) {
+  .professional-content {
+    padding: 12px;
+  }
+
+  .stats-dashboard {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .horses-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .horse-card {
+    margin: 0 auto;
+    max-width: 100%;
+  }
+
+  .form-content {
+    padding: 24px 16px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .form-actions {
+    flex-direction: column;
+
+    ion-button {
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .horse-header {
+    padding: 12px 16px;
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .horse-avatar {
+    margin-right: 0;
+  }
+
+  .horse-details {
+    padding: 12px 16px;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .empty-content {
+    padding: 32px 20px;
+  }
+
+  .empty-title {
+    font-size: 1.5rem;
+  }
+}
+
+/* ===========================================
+   ✨ ANIMACIONES PREMIUM
+   =========================================== */
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

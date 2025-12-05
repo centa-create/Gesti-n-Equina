@@ -609,6 +609,30 @@
     position: relative;
     z-index: 2;
 
+    .dashboard-logo {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 20px;
+      border-radius: 20px;
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.2),
+        0 4px 16px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(20px);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      animation: bounce 1s ease-in-out, glow 3s ease-in-out infinite alternate;
+      filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.5));
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: scale(1.05) rotate(2deg);
+        box-shadow:
+          0 12px 40px rgba(0, 0, 0, 0.3),
+          0 6px 20px rgba(0, 0, 0, 0.2),
+          inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      }
+    }
+
     .welcome-icon {
       font-size: 64px;
       color: #fbbf24;

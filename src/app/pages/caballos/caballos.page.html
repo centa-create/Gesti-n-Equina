@@ -1,196 +1,334 @@
 <ion-header>
-  <ion-toolbar>
+  <ion-toolbar class="professional-toolbar">
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home"></ion-back-button>
     </ion-buttons>
-    <ion-title>Gestión de Caballos</ion-title>
+    <ion-title class="professional-title">
+      <ion-icon name="paw" class="title-icon"></ion-icon>
+      Gestión de Caballos
+    </ion-title>
     <ion-buttons slot="end" *ngIf="canEdit">
-      <ion-button (click)="toggleForm()">
-        <ion-icon name="add"></ion-icon>
+      <ion-button fill="solid" color="primary" (click)="toggleForm()" class="add-button">
+        <ion-icon name="add" slot="start"></ion-icon>
+        Nuevo Caballo
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content class="professional-content">
   <!-- Filtros avanzados -->
-  <app-advanced-filters
-    [config]="filtrosConfig"
-    [values]="filtrosValues"
-    [isExpanded]="filtrosExpanded"
-    (valuesChange)="onFiltrosChange($event)"
-    (toggle)="onFiltrosToggle($event)"
-    (clear)="onFiltrosClear()"
-    (apply)="onFiltrosApply($event)">
-  </app-advanced-filters>
+  <div class="filters-section">
+    <app-advanced-filters
+      [config]="filtrosConfig"
+      [values]="filtrosValues"
+      [isExpanded]="filtrosExpanded"
+      (valuesChange)="onFiltrosChange($event)"
+      (toggle)="onFiltrosToggle($event)"
+      (clear)="onFiltrosClear()"
+      (apply)="onFiltrosApply($event)">
+    </app-advanced-filters>
+  </div>
 
-  <!-- Estadísticas -->
-  <ion-card class="stats-card" *ngIf="caballosFiltrados.length > 0">
-    <ion-card-content>
-      <div class="stats-grid">
-        <div class="stat-item">
-          <ion-icon name="paw" color="primary"></ion-icon>
-          <div>
-            <h3>{{ caballosFiltrados.length }}</h3>
-            <p>Caballos {{ filtrosValues['estado'] ? filtrosValues['estado'] + 's' : 'totales' }}</p>
+  <!-- Dashboard de Estadísticas -->
+  <div class="dashboard-section" *ngIf="caballosFiltrados.length > 0">
+    <h2 class="section-title">📊 Panel de Control</h2>
+    <div class="stats-dashboard">
+      <ion-card class="stat-card total premium-glow">
+        <ion-card-content>
+          <div class="stat-header">
+            <ion-icon name="paw" color="primary"></ion-icon>
+            <span class="stat-label">Total Caballos</span>
           </div>
-        </div>
-        <div class="stat-item">
-          <ion-icon name="male-female" color="secondary"></ion-icon>
-          <div>
-            <h3>{{ getEstadisticasGenero().machos }}M / {{ getEstadisticasGenero().hembras }}H</h3>
-            <p>Machos / Hembras</p>
+          <div class="stat-value">{{ caballosFiltrados.length }}</div>
+          <div class="stat-subtitle">{{ filtrosValues['estado'] ? filtrosValues['estado'] + 's' : 'registrados' }}</div>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="stat-card gender premium-float">
+        <ion-card-content>
+          <div class="stat-header">
+            <ion-icon name="male-female" color="secondary"></ion-icon>
+            <span class="stat-label">Distribución por Género</span>
           </div>
-        </div>
-        <div class="stat-item">
-          <ion-icon name="calendar" color="tertiary"></ion-icon>
-          <div>
-            <h3>{{ getEdadPromedio() }} años</h3>
-            <p>Edad promedio</p>
+          <div class="stat-value">{{ getEstadisticasGenero().machos + getEstadisticasGenero().hembras }}</div>
+          <div class="stat-subtitle">{{ getEstadisticasGenero().machos }} Machos / {{ getEstadisticasGenero().hembras }} Hembras</div>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="stat-card age premium-morph">
+        <ion-card-content>
+          <div class="stat-header">
+            <ion-icon name="calendar" color="tertiary"></ion-icon>
+            <span class="stat-label">Edad Promedio</span>
           </div>
+          <div class="stat-value">{{ getEdadPromedio() }}</div>
+          <div class="stat-subtitle">años promedio</div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+
+  <!-- Galería de Caballos -->
+  <div class="horses-section">
+    <h2 class="section-title" *ngIf="caballosFiltrados.length > 0">🐎 Caballos Registrados</h2>
+
+    <div class="horses-grid" *ngIf="caballosFiltrados.length > 0">
+      <ion-card class="horse-card premium-glow" *ngFor="let caballo of caballosFiltrados">
+        <ion-card-header class="horse-header">
+          <div class="horse-avatar">
+            <ion-icon [name]="caballo.sexo === 'macho' ? 'male' : 'female'" [color]="caballo.sexo === 'macho' ? 'primary' : 'tertiary'"></ion-icon>
+          </div>
+          <div class="horse-info">
+            <ion-card-title class="horse-name">{{ caballo.nombre }}</ion-card-title>
+            <ion-card-subtitle class="horse-subtitle">
+              <span class="breed">{{ caballo.raza || 'Sin raza especificada' }}</span>
+            </ion-card-subtitle>
+          </div>
+          <div class="horse-status">
+            <span class="status-badge" [class]="'status-' + caballo.estado">
+              {{ caballo.estado | titlecase }}
+            </span>
+          </div>
+        </ion-card-header>
+
+        <ion-card-content class="horse-details">
+          <div class="detail-grid">
+            <div class="detail-item">
+              <ion-icon name="calendar-outline" color="medium"></ion-icon>
+              <span>{{ getEdad(caballo.fechaNacimiento) }}</span>
+            </div>
+            <div class="detail-item">
+              <ion-icon name="color-palette-outline" color="medium"></ion-icon>
+              <span>{{ caballo.pelaje || 'No especificado' }}</span>
+            </div>
+            <div class="detail-item" *ngIf="caballo.nombreCriadero">
+              <ion-icon name="business-outline" color="medium"></ion-icon>
+              <span>{{ caballo.nombreCriadero }}</span>
+            </div>
+          </div>
+
+          <div class="horse-lineage" *ngIf="getPadre(caballo) || getMadre(caballo)">
+            <h4>Linaje</h4>
+            <div class="lineage-info">
+              <span *ngIf="getPadre(caballo)">
+                <strong>Padre:</strong> {{ getPadre(caballo)?.nombre }}
+              </span>
+              <span *ngIf="getMadre(caballo)">
+                <strong>Madre:</strong> {{ getMadre(caballo)?.nombre }}
+              </span>
+            </div>
+          </div>
+
+          <div class="horse-actions" *ngIf="canEdit">
+            <ion-button fill="clear" color="primary" size="small" (click)="editarCaballo(caballo); $event.stopPropagation()">
+              <ion-icon name="create" slot="start"></ion-icon>
+              Editar
+            </ion-button>
+            <ion-button fill="clear" color="danger" size="small" (click)="eliminarCaballo(caballo.id); $event.stopPropagation()">
+              <ion-icon name="trash" slot="start"></ion-icon>
+              Eliminar
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+
+  <!-- Formulario Profesional para agregar/editar caballo -->
+  <div class="form-section" *ngIf="showForm && canEdit">
+    <ion-card class="form-card premium-glow">
+      <ion-card-header class="form-header">
+        <ion-card-title class="form-title">
+          <ion-icon [name]="nuevoCaballo.id ? 'create' : 'add'" class="form-icon"></ion-icon>
+          {{ nuevoCaballo.id ? 'Editar' : 'Registrar Nuevo' }} Caballo
+        </ion-card-title>
+        <ion-card-subtitle class="form-subtitle">
+          Complete toda la información requerida del equino
+        </ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content class="form-content">
+        <form (ngSubmit)="agregarCaballo()" class="horse-form">
+          <div class="form-grid">
+            <!-- Información Básica -->
+            <div class="form-section-basic">
+              <h4 class="section-label">📋 Información Básica</h4>
+              <ion-item class="form-item">
+                <ion-input
+                  label="Nombre del Caballo"
+                  labelPlacement="floating"
+                  [(ngModel)]="nuevoCaballo.nombre"
+                  name="nombre"
+                  required
+                  placeholder="Ej: Relámpago, Bella Vista"
+                  class="premium-input">
+                </ion-input>
+              </ion-item>
+
+              <ion-item class="form-item">
+                <ion-input
+                  label="Nombre del Criadero"
+                  labelPlacement="floating"
+                  [(ngModel)]="nuevoCaballo.nombreCriadero"
+                  name="nombreCriadero"
+                  placeholder="Ej: Hacienda Los Álamos"
+                  class="premium-input">
+                </ion-input>
+              </ion-item>
+
+              <ion-item class="form-item">
+                <ion-datetime
+                  label="Fecha de Nacimiento"
+                  labelPlacement="floating"
+                  [(ngModel)]="nuevoCaballo.fechaNacimiento"
+                  name="fechaNacimiento"
+                  presentation="date"
+                  class="premium-input">
+                </ion-datetime>
+              </ion-item>
+
+              <ion-item class="form-item">
+                <ion-select
+                  label="Sexo"
+                  labelPlacement="floating"
+                  [(ngModel)]="nuevoCaballo.sexo"
+                  name="sexo"
+                  required
+                  placeholder="Seleccionar sexo"
+                  class="premium-input">
+                  <ion-select-option value="macho">
+                    <ion-icon name="male" slot="start"></ion-icon>
+                    Macho
+                  </ion-select-option>
+                  <ion-select-option value="hembra">
+                    <ion-icon name="female" slot="start"></ion-icon>
+                    Hembra
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+            </div>
+
+            <!-- Características Físicas -->
+            <div class="form-section-physical">
+              <h4 class="section-label">🎨 Características Físicas</h4>
+              <ion-item class="form-item">
+                <ion-input
+                  label="Raza"
+                  labelPlacement="floating"
+                  [(ngModel)]="nuevoCaballo.raza"
+                  name="raza"
+                  placeholder="Ej: Pura Sangre Inglés, Cuarto de Milla"
+                  class="premium-input">
+                </ion-input>
+              </ion-item>
+
+              <ion-item class="form-item">
+                <ion-input
+                  label="Pelaje"
+                  labelPlacement="floating"
+                  [(ngModel)]="nuevoCaballo.pelaje"
+                  name="pelaje"
+                  placeholder="Ej: Alazán, Tordo, Bayo"
+                  class="premium-input">
+                </ion-input>
+              </ion-item>
+
+              <ion-item class="form-item">
+                <ion-select
+                  label="Estado Actual"
+                  labelPlacement="floating"
+                  [(ngModel)]="nuevoCaballo.estado"
+                  name="estado"
+                  placeholder="Seleccionar estado"
+                  class="premium-input">
+                  <ion-select-option value="activo">
+                    <ion-icon name="checkmark-circle" slot="start" color="success"></ion-icon>
+                    Activo
+                  </ion-select-option>
+                  <ion-select-option value="inactivo">
+                    <ion-icon name="pause-circle" slot="start" color="warning"></ion-icon>
+                    Inactivo
+                  </ion-select-option>
+                  <ion-select-option value="fallecido">
+                    <ion-icon name="skull" slot="start" color="danger"></ion-icon>
+                    Fallecido
+                  </ion-select-option>
+                  <ion-select-option value="vendido">
+                    <ion-icon name="cash" slot="start" color="tertiary"></ion-icon>
+                    Vendido
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+            </div>
+          </div>
+
+          <!-- Observaciones -->
+          <div class="form-section-observations">
+            <h4 class="section-label">📝 Observaciones Adicionales</h4>
+            <ion-item class="form-item">
+              <ion-textarea
+                label="Observaciones"
+                labelPlacement="floating"
+                [(ngModel)]="nuevoCaballo.observaciones"
+                name="observaciones"
+                placeholder="Información adicional sobre el caballo, historial médico, premios, etc."
+                rows="4"
+                class="premium-textarea">
+              </ion-textarea>
+            </ion-item>
+          </div>
+
+          <!-- Botones de Acción -->
+          <div class="form-actions">
+            <ion-button
+              type="submit"
+              expand="block"
+              color="primary"
+              [disabled]="!nuevoCaballo.nombre || !nuevoCaballo.sexo"
+              class="submit-button premium-glow">
+              <ion-icon [name]="nuevoCaballo.id ? 'checkmark' : 'add'" slot="start"></ion-icon>
+              {{ nuevoCaballo.id ? 'Actualizar' : 'Registrar' }} Caballo
+            </ion-button>
+
+            <ion-button
+              fill="outline"
+              expand="block"
+              color="medium"
+              (click)="toggleForm()"
+              class="cancel-button">
+              <ion-icon name="close" slot="start"></ion-icon>
+              Cancelar
+            </ion-button>
+          </div>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Estado Vacío Profesional -->
+  <div class="empty-state" *ngIf="caballos.length === 0">
+    <ion-card class="empty-card premium-float">
+      <ion-card-content class="empty-content">
+        <div class="empty-icon">
+          <ion-icon name="paw-outline" size="large" color="medium"></ion-icon>
         </div>
-      </div>
-    </ion-card-content>
-  </ion-card>
-
-  <!-- Lista de caballos -->
-  <ion-list>
-    <ion-item *ngFor="let caballo of caballosFiltrados" lines="full">
-      <ion-label>
-        <h2>{{ caballo.nombre }}</h2>
-        <p>Raza: {{ caballo.raza }} | Edad: {{ getEdad(caballo.fechaNacimiento) }} | Sexo: {{ caballo.sexo }}</p>
-        <p>Estado: {{ caballo.estado }} | Pelaje: {{ caballo.pelaje }}</p>
-        <p *ngIf="caballo.nombreCriadero">Criadero: {{ caballo.nombreCriadero }}</p>
-        <p *ngIf="getPadre(caballo)">Padre: {{ getPadre(caballo)?.nombre }}</p>
-        <p *ngIf="getMadre(caballo)">Madre: {{ getMadre(caballo)?.nombre }}</p>
-        <p *ngIf="caballo.observaciones">Observaciones: {{ caballo.observaciones }}</p>
-      </ion-label>
-      <ion-button slot="end" fill="clear" color="primary" *ngIf="canEdit" (click)="editarCaballo(caballo)">
-        <ion-icon name="create"></ion-icon>
-      </ion-button>
-      <ion-button slot="end" fill="clear" color="danger" *ngIf="canEdit" (click)="eliminarCaballo(caballo.id)">
-        <ion-icon name="trash"></ion-icon>
-      </ion-button>
-    </ion-item>
-  </ion-list>
-
-  <!-- Formulario para agregar/editar caballo -->
-  <ion-card *ngIf="showForm && canEdit">
-    <ion-card-header>
-      <ion-card-title>{{ nuevoCaballo.id ? 'Editar' : 'Agregar' }} Caballo</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <form (ngSubmit)="agregarCaballo()">
-        <ion-item>
-          <ion-input
-            label="Nombre"
-            [(ngModel)]="nuevoCaballo.nombre"
-            name="nombre"
-            required
-            placeholder="Nombre del caballo">
-          </ion-input>
-        </ion-item>
-
-        <ion-item>
-          <ion-input
-            label="Nombre del criadero"
-            [(ngModel)]="nuevoCaballo.nombreCriadero"
-            name="nombreCriadero"
-            placeholder="Nombre del criadero">
-          </ion-input>
-        </ion-item>
-
-        <ion-item>
-          <ion-datetime
-            label="Fecha de nacimiento"
-            [(ngModel)]="nuevoCaballo.fechaNacimiento"
-            name="fechaNacimiento"
-            presentation="date">
-          </ion-datetime>
-        </ion-item>
-
-        <ion-item>
-          <ion-select
-            label="Sexo"
-            [(ngModel)]="nuevoCaballo.sexo"
-            name="sexo"
-            required>
-            <ion-select-option value="macho">Macho</ion-select-option>
-            <ion-select-option value="hembra">Hembra</ion-select-option>
-          </ion-select>
-        </ion-item>
-
-        <ion-item>
-          <ion-input
-            label="Raza"
-            [(ngModel)]="nuevoCaballo.raza"
-            name="raza"
-            placeholder="Raza del caballo">
-          </ion-input>
-        </ion-item>
-
-        <ion-item>
-          <ion-input
-            label="Pelaje"
-            [(ngModel)]="nuevoCaballo.pelaje"
-            name="pelaje"
-            placeholder="Color del pelaje">
-          </ion-input>
-        </ion-item>
-
-        <ion-item>
-          <ion-select
-            label="Estado"
-            [(ngModel)]="nuevoCaballo.estado"
-            name="estado">
-            <ion-select-option value="activo">Activo</ion-select-option>
-            <ion-select-option value="inactivo">Inactivo</ion-select-option>
-            <ion-select-option value="fallecido">Fallecido</ion-select-option>
-            <ion-select-option value="vendido">Vendido</ion-select-option>
-          </ion-select>
-        </ion-item>
-
-        <ion-item>
-          <ion-textarea
-            label="Observaciones"
-            [(ngModel)]="nuevoCaballo.observaciones"
-            name="observaciones"
-            placeholder="Observaciones adicionales"
-            rows="3">
-          </ion-textarea>
-        </ion-item>
-
-        <div class="ion-padding">
-          <ion-button
-            type="submit"
-            expand="full"
-            [disabled]="!nuevoCaballo.nombre || !nuevoCaballo.sexo">
-            <ion-icon *ngIf="false" name="refresh" slot="start"></ion-icon>
-            {{ nuevoCaballo.id ? 'Actualizar' : 'Crear' }} Caballo
-          </ion-button>
-          <ion-button
-            fill="clear"
-            expand="full"
-            color="medium"
-            (click)="toggleForm()">
-            Cancelar
-          </ion-button>
-        </div>
-      </form>
-    </ion-card-content>
-  </ion-card>
-
-  <!-- Mensaje cuando no hay caballos -->
-  <ion-card *ngIf="caballos.length === 0">
-    <ion-card-content class="ion-text-center">
-      <ion-icon name="paw-outline" size="large" color="medium"></ion-icon>
-      <h3>No hay caballos</h3>
-      <p *ngIf="canEdit">Registra tu primer caballo para comenzar</p>
-      <p *ngIf="!canEdit">No tienes permisos para gestionar caballos</p>
-      <ion-button *ngIf="canEdit" (click)="toggleForm()">
-        <ion-icon name="add" slot="start"></ion-icon>
-        Agregar Caballo
-      </ion-button>
-    </ion-card-content>
-  </ion-card>
+        <h2 class="empty-title">No hay caballos registrados</h2>
+        <p class="empty-description" *ngIf="canEdit">
+          Comienza registrando tu primer caballo en el sistema de gestión equina
+        </p>
+        <p class="empty-description" *ngIf="!canEdit">
+          No tienes permisos para gestionar caballos. Contacta al administrador.
+        </p>
+        <ion-button
+          *ngIf="canEdit"
+          (click)="toggleForm()"
+          color="primary"
+          class="empty-action-button premium-glow">
+          <ion-icon name="add" slot="start"></ion-icon>
+          Registrar Primer Caballo
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
 </ion-content>

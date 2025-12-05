@@ -15,7 +15,8 @@ import {
   startAfter,
   QueryDocumentSnapshot,
   DocumentData,
-  Timestamp
+  Timestamp,
+  QuerySnapshot
 } from 'firebase/firestore';
 
 @Injectable({
@@ -118,6 +119,8 @@ export class FirebaseService {
     limitCount?: number
   ): Promise<any[]> {
     try {
+      console.log(`FirebaseService: Querying ${collectionName} with filters:`, filters);
+
       const collectionRef = collection(db, collectionName);
       let queryConstraints: any[] = [];
 
@@ -137,10 +140,20 @@ export class FirebaseService {
       }
 
       const q = query(collectionRef, ...queryConstraints);
-      const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      // Agregar timeout para evitar consultas que cuelgan
+      const queryPromise = getDocs(q);
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error(`Query timeout for ${collectionName}`)), 10000)
+      );
+
+      const querySnapshot = await Promise.race([queryPromise, timeoutPromise]) as any;
+      const results = querySnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+
+      console.log(`FirebaseService: Query ${collectionName} returned ${results.length} documents`);
+      return results;
     } catch (error) {
-      console.error(`Error querying ${collectionName}:`, error);
+      console.error(`FirebaseService: Error querying ${collectionName}:`, error);
       throw error;
     }
   }
@@ -268,7 +281,19 @@ export class FirebaseService {
       const caballosActivos = caballos.filter(c => c.estado === 'activo').length;
       const criaderosActivos = criaderos.filter(c => c.activo).length;
       const serviciosEsteMes = servicios.filter(s => {
-        const fecha = s.fechaRealizacion;
+        let fecha: Date;
+        if (s.fechaRealizacion instanceof Date) {
+          fecha = s.fechaRealizacion;
+        } else if (s.fechaRealizacion && typeof s.fechaRealizacion === 'object' && 'toDate' in s.fechaRealizacion) {
+          // Firestore Timestamp
+          fecha = s.fechaRealizacion.toDate();
+        } else if (typeof s.fechaRealizacion === 'string') {
+          // String date
+          fecha = new Date(s.fechaRealizacion);
+        } else {
+          return false; // Invalid date
+        }
+
         const ahora = new Date();
         return fecha.getMonth() === ahora.getMonth() && fecha.getFullYear() === ahora.getFullYear();
       }).length;
